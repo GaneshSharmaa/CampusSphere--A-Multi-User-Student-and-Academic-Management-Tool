@@ -10,6 +10,7 @@ from sqlalchemy import select
 from database.database import Base, engine
 from database.dependencies import get_db
 from models.users import User
+from models.roles import Role
 from schemas.users import UserCreate, UserResponse, UserLogin
 from auth.hashing import hash_password, verify_password
 
