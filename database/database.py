@@ -12,7 +12,8 @@ if DATABASE_URL is None:
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo = False
+    echo = False,
+    pool_pre_ping = True
 )
 
 SessionLocal = async_sessionmaker(
