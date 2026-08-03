@@ -34,7 +34,6 @@ class User(Base):
     )
     phone: Mapped[str] = mapped_column(
         String(15),
-        unique = True,
         index = True,
         nullable = False
     )
