@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 # importing local modules
-from database.database import Base, engine
+from database.database import engine
 from database.dependencies import get_db
 from models.users import User
 from models.roles import Role
@@ -17,7 +17,9 @@ from auth.hashing import hash_password, verify_password
 # async database creation
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # startup
     yield
+    # shutdown
     await engine.dispose()
 
 # initializing the app
