@@ -17,9 +17,8 @@ from auth.hashing import hash_password, verify_password
 # async database creation
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
+    await engine.dispose()
 
 # initializing the app
 app = FastAPI(lifespan = lifespan)
