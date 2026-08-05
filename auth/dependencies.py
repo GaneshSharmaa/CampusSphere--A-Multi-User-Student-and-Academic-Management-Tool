@@ -13,7 +13,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
-async def get_user_current(
+# function to get current user using token
+async def get_current_user(
     db: Annotated[AsyncSession, Depends(get_db)],
     token: Annotated[str, Depends(oauth2scheme)]
 ) -> User:
