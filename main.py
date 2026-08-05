@@ -108,9 +108,23 @@ async def delete_user(user_id: int, admin_access: Annotated[User, Depends(requir
     if user is None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = "User not found"
+            detail = "User not found."
         )
 
     await db.delete(user)
     await db.commit()
+
+@app.get("/user/{user_id}", response_model = UserResponse)
+async def get_user(user_id: int, admin_access: Annotated[User, Depends(require_admin)], db: Annotated[AsyncSession, Depends(get_db)]):
+    user = await db.scalar(
+        select(User).where(User.id == user_id)
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "User not found."
+        )
+
+    return user
 
