@@ -1,5 +1,5 @@
 # importing required modules
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, status, Depends, Query
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from contextlib import asynccontextmanager
@@ -12,11 +12,11 @@ from database.database import engine
 from database.dependencies import get_db
 from models.users import User
 from models.roles import Role
-from schemas.users import UserCreate, UserResponse, UserLogin
+from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams
 from schemas.token import Token
 from auth.hashing import hash_password, verify_password
 from auth.jwt import create_access_token
-from auth.dependencies import get_current_user, require_admin
+from auth.dependencies import get_current_user, require_access
 
 # async database creation
 @asynccontextmanager
@@ -102,7 +102,11 @@ async def me(current_user: Annotated[User, Depends(get_current_user)]):
 
 # -------- DELETE ENDPOINT - ONLY ADMINS CAN DELETE THE USERS --------
 @app.delete("/delete/user/{user_id}", status_code = status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, admin_access: Annotated[User, Depends(require_admin)], db: Annotated[AsyncSession, Depends(get_db)]):
+async def delete_user(
+    user_id: int,
+    access: Annotated[User, Depends(require_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
     user = await db.scalar(select(User).where(User.id == user_id))
 
     if user is None:
@@ -115,7 +119,11 @@ async def delete_user(user_id: int, admin_access: Annotated[User, Depends(requir
     await db.commit()
 
 @app.get("/user/{user_id}", response_model = UserResponse)
-async def get_user(user_id: int, admin_access: Annotated[User, Depends(require_admin)], db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_user(
+    user_id: int,
+    access: Annotated[User, Depends(require_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
     user = await db.scalar(
         select(User).where(User.id == user_id)
     )
@@ -127,4 +135,32 @@ async def get_user(user_id: int, admin_access: Annotated[User, Depends(require_a
         )
 
     return user
+
+@app.get("/users/search", response_model = list[UserResponse])
+async def search_user(
+    access: Annotated[User, Depends(require_access)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    q_params: Annotated[UserQueryParams, Query()]
+):
+    query = select(User)
+
+    if q_params.first_name:
+        query = query.where(User.first_name.ilike(f"%{q_params.first_name}%"))
+
+    if q_params.last_name:
+        query = query.where(User.last_name.ilike(f"%{q_params.last_name}%"))
+
+    if q_params.email:
+        query = query.where(User.email.ilike(f"%{q_params.email}%"))
+
+    if q_params.phone:
+        query = query.where(User.phone.ilike(f"%{q_params.phone}%"))
+
+    if q_params.dob:
+        query = query.where(User.dob.ilike(f"%{q_params.dob}%"))
+
+    result = await db.scalars(query)
+    users = result.all()
+
+    return users
 
