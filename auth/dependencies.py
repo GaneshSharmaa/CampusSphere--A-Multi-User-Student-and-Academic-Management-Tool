@@ -7,6 +7,7 @@ from models.roles import Role
 # importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from fastapi import Depends, HTTPException, status
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
@@ -26,7 +27,7 @@ async def get_current_user(
 
     # querying the database if user exists
     user = await db.scalar(
-        select(User).where(User.id == user_id)
+        select(User).option(selectinload(User.role)).where(User.id == user_id)
     )
 
     # raising HTTP exception if not found
