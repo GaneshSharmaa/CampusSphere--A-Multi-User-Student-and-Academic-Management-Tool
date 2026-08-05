@@ -28,6 +28,7 @@ class UserLogin(BaseModel):
 class UserQueryParams(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
-    department: str | None = None
-    role: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    dob: PastDate | None = None
 
