@@ -27,7 +27,7 @@ async def get_current_user(
 
     # querying the database if user exists
     user = await db.scalar(
-        select(User).option(selectinload(User.role)).where(User.id == user_id)
+        select(User).options(selectinload(User.role)).where(User.id == user_id)
     )
 
     # raising HTTP exception if not found
