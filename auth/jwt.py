@@ -41,10 +41,10 @@ def verify_access_token(token: str) -> str:
         payload = jwt.decode(
             jwt = token,
             key = SECRET_KEY,
-            algorithms = ALGORITHM
+            algorithms = [ALGORITHM]
         )
 
-        sub = payload.get["sub"]
+        sub = payload.get("sub")
 
         if sub is None:
             raise HTTPException(
