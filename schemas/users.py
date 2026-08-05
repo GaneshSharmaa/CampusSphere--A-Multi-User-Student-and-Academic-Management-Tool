@@ -24,3 +24,10 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+# schema for query parameters
+class UserQueryParams(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    department: str | None = None
+    role: str | None = None
+
