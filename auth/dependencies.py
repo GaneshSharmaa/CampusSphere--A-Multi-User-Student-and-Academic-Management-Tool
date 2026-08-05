@@ -37,3 +37,14 @@ async def get_current_user(
         )
 
     return user
+
+# function to authorize only admin user
+async def require_admin(current_user: Annotated[User, Depends(get_current_user)]):
+    if current_user.role.role_name != "Admin":
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    return current_user
+
