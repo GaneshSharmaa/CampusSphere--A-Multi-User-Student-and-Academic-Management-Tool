@@ -10,6 +10,12 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+# schema for updating user
+class UserUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    dob: PastDate | None = None
+
 # schema for response model - user response
 class UserResponse(BaseModel):
     first_name: str
