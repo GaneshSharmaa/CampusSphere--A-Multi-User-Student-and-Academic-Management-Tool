@@ -12,7 +12,7 @@ from database.database import engine
 from database.dependencies import get_db
 from models.users import User
 from models.roles import Role
-from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams
+from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams, UserUpdate
 from schemas.token import Token
 from auth.hashing import hash_password, verify_password
 from auth.jwt import create_access_token
@@ -96,7 +96,7 @@ async def login(
     }
 
 # --------- PROFILE ROUTE - SHOWS WHICH USER IS LOGGED IN ---------
-@app.get("/me")
+@app.get("/me", response_model = UserResponse)
 async def me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 
@@ -118,6 +118,7 @@ async def delete_user(
     await db.delete(user)
     await db.commit()
 
+# -------- GET USER INFORMATION ROUTE BY USER ID --------
 @app.get("/user/{user_id}", response_model = UserResponse)
 async def get_user(
     user_id: int,
@@ -136,6 +137,7 @@ async def get_user(
 
     return user
 
+# --------- FILTER USER ROUTE USING QUERY ROUTE ---------
 @app.get("/users/search", response_model = list[UserResponse])
 async def search_user(
     access: Annotated[User, Depends(require_access)],
@@ -163,4 +165,21 @@ async def search_user(
     users = result.all()
 
     return users
+
+# PATCH ROUTE FOR UPDATING USER INFORMATION
+@app.patch("/me", response_model = UserResponse)
+async def partial_user_update(
+    user_data: UserUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    update_data = user_data.model_dump(exclude_unset = True)
+
+    for key, value in update_data.items():
+        setattr(current_user, key, value)
+
+    await db.commit()
+    await db.refresh(current_user)
+
+    return current_user
 
