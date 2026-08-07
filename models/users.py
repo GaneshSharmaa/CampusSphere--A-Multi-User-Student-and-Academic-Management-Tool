@@ -54,8 +54,7 @@ class User(Base):
     )
     role_id: Mapped[int] = mapped_column(
         ForeignKey("roles.id"),
-        nullable = False,
-        default = 3
+        nullable = False
     )
 
     # relationship
