@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.roles import Role
+    from models.students import Student
 
 class User(Base):
     __tablename__ = "users"
@@ -35,7 +36,8 @@ class User(Base):
     phone: Mapped[str] = mapped_column(
         String(15),
         index = True,
-        nullable = False
+        nullable = False,
+        unique = True
     )
     hashed_password: Mapped[str] = mapped_column(
         String(255),
@@ -60,5 +62,11 @@ class User(Base):
     # relationship
     role: Mapped["Role"] = relationship(
         back_populates = "users"
+    )
+
+    student: Mapped["Student"] = relationship(
+        back_populates = "user",
+        uselist = False,
+        cascade = "all, delete-orphan"
     )
 
