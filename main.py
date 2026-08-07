@@ -47,13 +47,18 @@ async def create_new_user(user: UserCreate, db: Annotated[AsyncSession, Depends(
             detail = "User with this email already exists!"
         )
 
+    student_role = await db.scalar(
+        select(Role).where(Role.role_name == "Student")
+    )
+
     new_user = User(
         first_name = user.first_name,
         last_name = user.last_name,
         dob = user.dob,
         phone = user.phone,
         email = user.email,
-        hashed_password = hash_password(user.password)
+        hashed_password = hash_password(user.password),
+        role_id = student_role.id
     )
 
     db.add(new_user)
@@ -166,7 +171,7 @@ async def search_user(
 
     return users
 
-# PATCH ROUTE FOR UPDATING USER INFORMATION
+# ---------- PATCH ROUTE FOR UPDATING USER INFORMATION ----------
 @app.patch("/me", response_model = UserResponse)
 async def partial_user_update(
     user_data: UserUpdate,
@@ -183,3 +188,4 @@ async def partial_user_update(
 
     return current_user
 
+# 
