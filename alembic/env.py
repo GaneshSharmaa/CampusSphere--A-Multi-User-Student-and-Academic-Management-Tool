@@ -11,6 +11,8 @@ from alembic import context
 from database.database import Base
 from models.roles import Role
 from models.users import User
+from models.students import Student
+from models.departments import Department
 
 # importing the environment and os modules
 from os import getenv
