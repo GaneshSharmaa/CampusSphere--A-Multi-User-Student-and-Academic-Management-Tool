@@ -12,8 +12,11 @@ from database.database import engine
 from database.dependencies import get_db
 from models.users import User
 from models.roles import Role
+from models.departments import Department
+from models.students import Student
 from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams, UserUpdate
 from schemas.token import Token
+from schemas.departments import CreateDepartment, ResponseDepartment
 from auth.hashing import hash_password, verify_password
 from auth.jwt import create_access_token
 from auth.dependencies import get_current_user, require_access
@@ -188,4 +191,45 @@ async def partial_user_update(
 
     return current_user
 
-# 
+# ------- POST ROUTE FOR CREATING DEPARTMENTS (ADMIN ONLY) -------
+@app.post("/create-department")
+async def create_department(
+    dept: CreateDepartment,
+    access: Annotated[User, Depends(require_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    code_chk = await db.scalar(
+        select(Department).where(
+            Department.dept_code == dept.dept_code
+        )
+    )
+
+    name_chk = await db.scalar(
+        select(Department).where(
+            Department.dept_name == dept.dept_name
+        )
+    )
+
+    if code_chk is not None: 
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail = "This department already exists."
+        )
+
+    if name_chk is not None:
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail = "This department already exists."
+        )
+
+    new_dept = Department(
+        dept_code = dept.dept_code.upper(),
+        dept_name = dept.dept_name.title()
+    )
+
+    db.add(new_dept)
+    await db.commit()
+    await db.refresh(new_dept)
+
+    return new_dept
+
