@@ -2,7 +2,6 @@
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
 from models.users import User
-from models.roles import Role
 
 # importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +39,7 @@ async def get_current_user(
     return user
 
 # function to authorize only admin and teacher user
-async def require_access(current_user: Annotated[User, Depends(get_current_user)]):
+async def admin_teacher_access(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.role.role_name == "Admin" or current_user.role.role_name == "Teacher":
         return current_user
 
