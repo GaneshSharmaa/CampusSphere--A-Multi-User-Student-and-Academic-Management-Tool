@@ -6,19 +6,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi.security import OAuth2PasswordRequestForm
 
-# importing local modules
+# importing database related local modules
 from database.database import engine
 from database.dependencies import get_db
-from models.users import User
-from models.roles import Role
+
+# importing local database models
 from models.departments import Department
+from models.faculty import Faculty
+from models.roles import Role
 from models.students import Student
-from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams, UserUpdate
+from models.users import User
+
+# importing local schemas
+from schemas.users import UserCreate, UserResponse, UserLogin, UserQueryParams
 from schemas.token import Token
 from schemas.departments import CreateDepartment, ResponseDepartment
+
+# importing authentication and authorization local modules
 from auth.hashing import hash_password, verify_password
 from auth.jwt import create_access_token
-from auth.dependencies import get_current_user, require_access
+from auth.dependencies import get_current_user, admin_teacher_access
 
 # async database creation
 @asynccontextmanager
@@ -41,26 +48,30 @@ async def home():
 # ------ REGISTER ROUTE - CREATING NEW USER ------
 @app.post("/register", response_model = UserResponse)
 async def create_new_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
-    email_chk = await db.scalar(select(User).where(user.email == User.email))
+    email_chk = await db.scalar(
+        select(User).where(user.email == User.email)
+    )
+
+    phone_chk = await db.scalar(
+        select(User).where(User.phone == user.phone)
+    )
 
     if email_chk is not None:
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
             detail = "User with this email already exists!"
         )
-
-    student_role = await db.scalar(
-        select(Role).where(Role.role_name == "Student")
-    )
+    
+    if phone_chk is not None:
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail = "User with this phone already exists!"
+        )
 
     new_user = User(
-        first_name = user.first_name,
-        last_name = user.last_name,
-        dob = user.dob,
-        phone = user.phone,
         email = user.email,
-        hashed_password = hash_password(user.password),
-        role_id = student_role.id
+        phone = user.phone,
+        hashed_password = hash_password(user.password)
     )
 
     db.add(new_user)
@@ -101,134 +112,4 @@ async def login(
         "access_token": access_token,
         "token_type": "bearer"
     }
-
-# --------- PROFILE ROUTE - SHOWS WHICH USER IS LOGGED IN ---------
-@app.get("/me", response_model = UserResponse)
-async def me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user
-
-# -------- DELETE ENDPOINT - ONLY ADMINS CAN DELETE THE USERS --------
-@app.delete("/delete/user/{user_id}", status_code = status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_id: int,
-    access: Annotated[User, Depends(require_access)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    user = await db.scalar(select(User).where(User.id == user_id))
-
-    if user is None:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = "User not found."
-        )
-
-    await db.delete(user)
-    await db.commit()
-
-# -------- GET USER INFORMATION ROUTE BY USER ID --------
-@app.get("/user/{user_id}", response_model = UserResponse)
-async def get_user(
-    user_id: int,
-    access: Annotated[User, Depends(require_access)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    user = await db.scalar(
-        select(User).where(User.id == user_id)
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = "User not found."
-        )
-
-    return user
-
-# --------- FILTER USER ROUTE USING QUERY ROUTE ---------
-@app.get("/users/search", response_model = list[UserResponse])
-async def search_user(
-    access: Annotated[User, Depends(require_access)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-    q_params: Annotated[UserQueryParams, Query()]
-):
-    query = select(User)
-
-    if q_params.first_name:
-        query = query.where(User.first_name.ilike(f"%{q_params.first_name}%"))
-
-    if q_params.last_name:
-        query = query.where(User.last_name.ilike(f"%{q_params.last_name}%"))
-
-    if q_params.email:
-        query = query.where(User.email.ilike(f"%{q_params.email}%"))
-
-    if q_params.phone:
-        query = query.where(User.phone.ilike(f"%{q_params.phone}%"))
-
-    if q_params.dob:
-        query = query.where(User.dob.ilike(f"%{q_params.dob}%"))
-
-    result = await db.scalars(query)
-    users = result.all()
-
-    return users
-
-# ---------- PATCH ROUTE FOR UPDATING USER INFORMATION ----------
-@app.patch("/me", response_model = UserResponse)
-async def partial_user_update(
-    user_data: UserUpdate,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)]
-):
-    update_data = user_data.model_dump(exclude_unset = True)
-
-    for key, value in update_data.items():
-        setattr(current_user, key, value)
-
-    await db.commit()
-    await db.refresh(current_user)
-
-    return current_user
-
-# ------- POST ROUTE FOR CREATING DEPARTMENTS (ADMIN ONLY) -------
-@app.post("/create-department")
-async def create_department(
-    dept: CreateDepartment,
-    access: Annotated[User, Depends(require_access)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    code_chk = await db.scalar(
-        select(Department).where(
-            Department.dept_code == dept.dept_code
-        )
-    )
-
-    name_chk = await db.scalar(
-        select(Department).where(
-            Department.dept_name == dept.dept_name
-        )
-    )
-
-    if code_chk is not None: 
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "This department already exists."
-        )
-
-    if name_chk is not None:
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "This department already exists."
-        )
-
-    new_dept = Department(
-        dept_code = dept.dept_code.upper(),
-        dept_name = dept.dept_name.title()
-    )
-
-    db.add(new_dept)
-    await db.commit()
-    await db.refresh(new_dept)
-
-    return new_dept
 
