@@ -10,22 +10,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from models.roles import Role
     from models.students import Student
+    from models.faculty import Faculty
 
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key = True)
-    first_name: Mapped[str] = mapped_column(
-        String(50),
-        nullable = False
-    )
-    last_name: Mapped[str] = mapped_column(
-        String(50),
-        nullable = False
-    )
-    dob: Mapped[date] = mapped_column(
-        Date,
-        nullable = False
+    id: Mapped[int] = mapped_column(
+        primary_key = True
     )
     email: Mapped[str] = mapped_column(
         String(255),
@@ -54,12 +45,8 @@ class User(Base):
         onupdate = func.now(),
         nullable = False
     )
-    role_id: Mapped[int] = mapped_column(
-        ForeignKey("roles.id"),
-        nullable = False
-    )
 
-    # relationship
+    # relationships
     role: Mapped["Role"] = relationship(
         back_populates = "users"
     )
@@ -68,5 +55,9 @@ class User(Base):
         back_populates = "user",
         uselist = False,
         cascade = "all, delete-orphan"
+    )
+
+    faculty: Mapped["Faculty"] = relationship(
+        back_populates = "user"
     )
 
