@@ -20,8 +20,3 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-# schema for query parameters
-class UserQueryParams(BaseModel):
-    email: str | None = None
-    phone: str | None = None
-
