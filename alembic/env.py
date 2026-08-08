@@ -9,10 +9,11 @@ from alembic import context
 
 # import the database models and Base
 from database.database import Base
-from models.roles import Role
-from models.users import User
-from models.students import Student
 from models.departments import Department
+from models.faculty import Faculty
+from models.roles import Role
+from models.students import Student
+from models.users import User
 
 # importing the environment and os modules
 from os import getenv
