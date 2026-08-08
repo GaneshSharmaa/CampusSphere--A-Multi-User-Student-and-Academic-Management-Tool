@@ -47,10 +47,6 @@ class User(Base):
     )
 
     # relationships
-    role: Mapped["Role"] = relationship(
-        back_populates = "users"
-    )
-
     student: Mapped["Student"] = relationship(
         back_populates = "user",
         uselist = False,

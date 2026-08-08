@@ -22,10 +22,7 @@ class Role(Base):
         nullable = False
     )
 
-    users: Mapped[list["User"]] = relationship(
-        back_populates = "role"
-    )
-
+    # relationships
     faculty: Mapped[list["Faculty"]] = relationship(
         back_populates = "role"
     )
