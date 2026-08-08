@@ -56,12 +56,12 @@ class Faculty(Base):
         Date,
         nullable = False
     )
-    department: Mapped[str] = mapped_column(
+    dept_name: Mapped[str] = mapped_column(
         ForeignKey("departments.dept_name"),
         nullable = False
     )
-    role: Mapped[str] = mapped_column(
-        ForeignKey("roles.role_name"),
+    role_id: Mapped[int] = mapped_column(
+        ForeignKey("roles.id"),
         nullable = False
     )
     created_at: Mapped[datetime] = mapped_column(
