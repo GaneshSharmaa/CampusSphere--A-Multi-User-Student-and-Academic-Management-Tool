@@ -26,7 +26,7 @@ async def get_current_user(
 
     # querying the database if user exists
     user = await db.scalar(
-        select(User).options(selectinload(User.role)).where(User.id == user_id)
+        select(User).options(selectinload(User.faculty)).where(User.id == user_id)
     )
 
     # raising HTTP exception if not found
@@ -40,7 +40,7 @@ async def get_current_user(
 
 # function to authorize only admin and teacher user
 async def admin_teacher_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.role.role_name == "Admin" or current_user.role.role_name == "Teacher":
+    if current_user.faculty.role.role_name == "Admin" or current_user.faculty.role.role_name == "Teacher":
         return current_user
 
     raise HTTPException(
