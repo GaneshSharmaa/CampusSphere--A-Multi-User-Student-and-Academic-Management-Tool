@@ -57,7 +57,7 @@ class Student(Base):
         nullable = False
     )
     department: Mapped[str] = mapped_column(
-        ForeignKey("departments.dept_name"),
+        ForeignKey("departments.dept_code"),
         nullable = False
     )
     start_batch_year: Mapped[int] = mapped_column(
@@ -83,10 +83,6 @@ class Student(Base):
     )
 
     # relationships
-    user: Mapped["User"] = relationship(
-        back_populates = "student"
-    )
-
     dept: Mapped["Department"] = relationship(
         back_populates = "students"
     )

@@ -56,8 +56,8 @@ class Faculty(Base):
         Date,
         nullable = False
     )
-    dept_name: Mapped[str] = mapped_column(
-        ForeignKey("departments.dept_name"),
+    dept_code: Mapped[str] = mapped_column(
+        ForeignKey("departments.dept_code"),
         nullable = False
     )
     role_id: Mapped[int] = mapped_column(
@@ -77,15 +77,15 @@ class Faculty(Base):
     )
 
     # relationships
-    role: Mapped["Role"] = relationship(
+    user: Mapped["User"] = relationship(
         back_populates = "faculty"
+    )
+
+    role: Mapped["Role"] = relationship(
+        back_populates = "faculties"
     )
 
     dept: Mapped["Department"] = relationship(
         back_populates = "faculties"
-    )
-
-    user: Mapped["User"] = relationship(
-        back_populates = "faculty"
     )
 

@@ -38,11 +38,11 @@ class Department(Base):
     )
 
     # relationships
-    students: Mapped[list["Student"]] = relationship(
+    faculties: Mapped[list["Faculty"]] = relationship(
         back_populates = "dept"
     )
 
-    faculties: Mapped[list["Faculty"]] = relationship(
+    students: Mapped[list["Student"]] = relationship(
         back_populates = "dept"
     )
 

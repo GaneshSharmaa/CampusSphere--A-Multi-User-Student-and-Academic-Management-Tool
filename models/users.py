@@ -47,12 +47,6 @@ class User(Base):
     )
 
     # relationships
-    student: Mapped["Student"] = relationship(
-        back_populates = "user",
-        uselist = False,
-        cascade = "all, delete-orphan"
-    )
-
     faculty: Mapped["Faculty"] = relationship(
         back_populates = "user"
     )

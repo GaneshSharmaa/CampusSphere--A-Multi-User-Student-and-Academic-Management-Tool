@@ -23,7 +23,7 @@ class Role(Base):
     )
 
     # relationships
-    faculty: Mapped[list["Faculty"]] = relationship(
+    faculties: Mapped[list["Faculty"]] = relationship(
         back_populates = "role"
     )
-
+    
