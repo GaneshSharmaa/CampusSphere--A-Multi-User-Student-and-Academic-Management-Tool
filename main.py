@@ -1,6 +1,5 @@
 # importing required modules
 from fastapi import FastAPI, HTTPException, status, Depends, Query
-from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
