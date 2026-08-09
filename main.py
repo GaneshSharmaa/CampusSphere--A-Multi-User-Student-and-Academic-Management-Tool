@@ -10,8 +10,10 @@ from database.database import engine
 from database.dependencies import get_db
 
 # Importing database models
+from models.departments import Department
 from models.faculty import Faculty
 from models.roles import Role
+from models.students import Student
 from models.users import User
 
 # Importing schemas
