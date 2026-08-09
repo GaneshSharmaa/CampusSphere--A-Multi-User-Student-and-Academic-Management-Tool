@@ -2,6 +2,7 @@
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
 from models.users import User
+from models.faculty import Faculty
 
 # Importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +27,7 @@ async def get_current_user(
 
     # Querying the database if user exists
     user = await db.scalar(
-        select(User).options(selectinload(User.faculty)).where(User.id == user_id)
+        select(User).options(selectinload(User.faculty).selectinload(Faculty.role)).where(User.id == user_id)
     )
 
     # Raising HTTP exception if not found
