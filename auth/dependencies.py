@@ -11,7 +11,7 @@ from fastapi import Depends, HTTPException, status
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2scheme = OAuth2PasswordBearer(tokenUrl = "login")
+oauth2scheme = OAuth2PasswordBearer(tokenUrl = "users/login")
 
 # Function to get current user using token
 async def get_current_user(
