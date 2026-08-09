@@ -7,5 +7,6 @@ class RoleCreate(BaseModel):
 
 # schema for role response
 class RoleResponse(BaseModel):
+    id: int
     role_name: str
 
