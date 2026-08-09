@@ -1,8 +1,8 @@
 # Importing the required modules
-from fastapi import HTTPException, status, Depends, APIRouter
+from fastapi import HTTPException, status, Depends, Query, APIRouter
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi.security import OAuth2PasswordRequestForm
 
 # Importing the database dependencies
@@ -10,10 +10,9 @@ from database.dependencies import get_db
 
 # Importing the database models
 from models.users import User
-from models.faculty import Faculty
 
 # Importing the schemas
-from schemas.users import UserCreate, UserResponse, UserLogin
+from schemas.users import UserCreate, UserResponse, UserQueryParams
 from schemas.token import Token
 
 # Importing authentication and authorization modules
@@ -110,4 +109,27 @@ async def my_profile(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
     return current_user
+
+# -------- GET USER ROUTE (QUERY PARAMETER) --------
+@router.get("/search", response_model = UserResponse)
+async def get_user_info(
+    user: Annotated[UserQueryParams, Query()],
+    admin_access: Annotated[User, Depends(admin_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    query = await db.execute(
+        select(User)
+    )
+
+    if user.email:
+        query = await db.execute(
+            select(User).where(User.email.ilike(f"%{user.email}%"))
+        )
+    if user.phone:
+        query = await db.execute(
+            select(User).where(User.email.ilike(f"%{user.phone}%"))
+        )
+
+    users = query.all()
+    return users
 
