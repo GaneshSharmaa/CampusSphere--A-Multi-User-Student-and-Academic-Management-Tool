@@ -1,9 +1,9 @@
-# importing local module
+# Importing local module
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
 from models.users import User
 
-# importing the required module
+# Importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -13,23 +13,23 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
-# function to get current user using token
+# Function to get current user using token
 async def get_current_user(
     db: Annotated[AsyncSession, Depends(get_db)],
     token: Annotated[str, Depends(oauth2scheme)]
 ) -> User:
-    # verifying the access token and getting the payload
+    # Verifying the access token and getting the payload
     payload = verify_access_token(token)
 
-    # converting the `sub` (user ID) to int
+    # Converting the `sub` (user ID) to int
     user_id = int(payload["sub"])
 
-    # querying the database if user exists
+    # Querying the database if user exists
     user = await db.scalar(
         select(User).options(selectinload(User.faculty)).where(User.id == user_id)
     )
 
-    # raising HTTP exception if not found
+    # Raising HTTP exception if not found
     if user is None:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
@@ -38,7 +38,7 @@ async def get_current_user(
 
     return user
 
-# function to authorize `Admin` users only
+# Function to authorize `Admin` users only
 async def admin_access(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.faculty.role.role_name == "Admin":
         return current_user
@@ -48,7 +48,7 @@ async def admin_access(current_user: Annotated[User, Depends(get_current_user)])
         detail = "Not authorized."
     )
 
-# function to authorize `Professor` users only
+# Function to authorize `Professor` users only
 async def professor_access(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.faculty.role.role_name == "Professor":
         return current_user
@@ -57,7 +57,7 @@ async def professor_access(current_user: Annotated[User, Depends(get_current_use
         detail = "Not authorized."
     )
 
-# function to authorize `HOD` users only
+# Function to authorize `HOD` users only
 async def hod_access(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.faculty.role.role_name == "HOD":
         return current_user
@@ -66,10 +66,23 @@ async def hod_access(current_user: Annotated[User, Depends(get_current_user)]):
         detail = "Not authorized."
     )
 
-# function to authorize `Principal` users only
+# Function to authorize `Principal` users only
 async def principal_access(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.faculty.role.role_name == "Principal":
         return current_user
+    raise HTTPException(
+        status_code = status.HTTP_403_FORBIDDEN,
+        detail = "Not authorized."
+    )
+
+# Function to authorize a list of roles
+async def access(
+    current_user: Annotated[User, Depends(get_current_user)],
+    access: list
+):
+    if current_user.faculty.role.role_name in access:
+        return current_user
+
     raise HTTPException(
         status_code = status.HTTP_403_FORBIDDEN,
         detail = "Not authorized."
