@@ -1,5 +1,5 @@
 from typing import Annotated
-from pydantic import BaseModel, ConfigDict, EmailStr, PastDate
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 # schema for request validation - user creating / registering
 class UserCreate(BaseModel):
@@ -19,4 +19,9 @@ class UserResponse(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+# Schema for query parameter
+class UserQueryParams(BaseModel):
+    email: str | None = None
+    phone: str | None = None
 
