@@ -111,25 +111,20 @@ async def my_profile(
     return current_user
 
 # -------- GET USER ROUTE (QUERY PARAMETER) --------
-@router.get("/search", response_model = UserResponse)
+@router.get("/search", response_model = list[UserResponse])
 async def get_user_info(
     user: Annotated[UserQueryParams, Query()],
     admin_access: Annotated[User, Depends(admin_access)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    query = await db.execute(
-        select(User)
-    )
+    statement = select(User)
 
     if user.email:
-        query = await db.execute(
-            select(User).where(User.email.ilike(f"%{user.email}%"))
-        )
+        statement = statement.where(User.email.ilike(f"%{user.email}%"))
     if user.phone:
-        query = await db.execute(
-            select(User).where(User.email.ilike(f"%{user.phone}%"))
-        )
+        statement = statement.where(User.phone.ilike(f"%{user.phone}%"))
 
-    users = query.all()
+    result = await db.scalars(statement)
+    users = result.all()
     return users
 
