@@ -23,7 +23,7 @@ from schemas.roles import RoleCreate, RoleResponse
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
 
 # Importing routes
-from routes import users, faculty, roles
+from routes import users, faculty, roles, departments
 
 # Async database creation
 @asynccontextmanager
@@ -42,7 +42,7 @@ app = FastAPI(
 # Include the `users` router
 app.include_router(
     users.router,
-    prefix = "/users",
+    prefix = "/user",
     tags = ["User Management"]
 )
 
@@ -56,8 +56,15 @@ app.include_router(
 # Include the `roles` router
 app.include_router(
     roles.router,
-    prefix = "/roles",
+    prefix = "/role",
     tags = ["Role Management"]
+)
+
+# Include the `departments` router
+app.include_router(
+    departments.router,
+    prefix = "/department",
+    tags = ["Department Management"]
 )
 
 # -------- HOME ROUTE --------
