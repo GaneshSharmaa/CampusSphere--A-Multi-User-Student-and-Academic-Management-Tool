@@ -1,6 +1,5 @@
 # Importing required modules
-from fastapi import FastAPI, HTTPException, status, Depends, Query
-from typing import Annotated
+from fastapi import FastAPI, HTTPException, status, Depends
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
