@@ -36,7 +36,9 @@ async def create_role(
             detail = "Role already exists."
         )
 
-    db.add(role)
+    new_role = Role(**role.model_dump())
+
+    db.add(new_role)
     await db.commit()
-    await db.refresh(role)
+    await db.refresh(new_role)
 
