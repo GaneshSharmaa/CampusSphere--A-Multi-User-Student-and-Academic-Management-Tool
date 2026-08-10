@@ -24,7 +24,7 @@ from schemas.roles import RoleCreate, RoleResponse
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
 
 # Importing routes
-from routes import users, faculty
+from routes import users, faculty, roles
 
 # Async database creation
 @asynccontextmanager
@@ -40,7 +40,7 @@ app = FastAPI(
     lifespan = lifespan
 )
 
-# Include the `user` router
+# Include the `users` router
 app.include_router(
     users.router,
     prefix = "/users",
@@ -54,31 +54,17 @@ app.include_router(
     tags = ["Faculty Management"]
 )
 
+# Include the `roles` router
+app.include_router(
+    roles.router,
+    prefix = "/roles",
+    tags = ["Role Management"]
+)
+
 # -------- HOME ROUTE --------
 @app.get("/")
 async def home():
     return {
         "message": "Hello!"
     }
-
-# --------- CREATING ROLE ROUTE ---------
-@app.post("/create-role", response_model = RoleResponse)
-async def create_role(
-    role: RoleCreate,
-    access: Annotated[User, Depends(admin_access)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    role_chk = await db.scalar(
-        select(Role).where(Role.role_name == role.role_name)
-    )
-
-    if role_chk is not None:
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "Role already exists."
-        )
-
-    db.add(role)
-    await db.commit()
-    await db.refresh(role)
 
