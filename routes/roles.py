@@ -20,7 +20,7 @@ from auth.dependencies import get_current_user, admin_access
 router = APIRouter()
 
 # ------- POST ROUTE - CREATING ROLE ROUTE -------
-@router.post("/create-role", response_model = RoleResponse)
+@router.post("/create", response_model = RoleResponse)
 async def create_role(
     role: RoleCreate,
     access: Annotated[User, Depends(admin_access)],
@@ -41,4 +41,6 @@ async def create_role(
     db.add(new_role)
     await db.commit()
     await db.refresh(new_role)
+
+    return new_role
 
