@@ -12,14 +12,14 @@ from models.users import User
 from models.departments import Department
 
 # Importing the schemas
-from schemas.departments import CreateDepartment, ResponseDepartment
+from schemas.departments import CreateDepartment, ResponseDepartment, UpdateDepartment
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, principal_access
 
 router = APIRouter()
 
-# POST ROUTE - CREATE DEPARTMENT ROUTE
+# ------- POST ROUTE - CREATE DEPARTMENT ROUTE -------
 @router.post("/create", response_model = ResponseDepartment)
 async def create_department(
     department: CreateDepartment,
