@@ -3,7 +3,7 @@ from database.database import Base
 
 # importing required modules
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, Text, Integer, DateTime, Date, func
+from sqlalchemy import ForeignKey, String, Text, Integer, DateTime, Date, func, Identity
 from sqlalchemy import Enum as SQLEnum
 from datetime import datetime, date
 from enum import Enum
@@ -23,6 +23,7 @@ class Faculty(Base):
     __tablename__ = "faculty"
 
     emp_id: Mapped[int] = mapped_column(
+        Identity(start = 2),
         primary_key = True,
         index = True
     )
