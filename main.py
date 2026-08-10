@@ -61,7 +61,7 @@ app.include_router(
 )
 
 # -------- HOME ROUTE --------
-@app.get("/")
+@app.get("/", include_in_schema = False)
 async def home():
     return {
         "message": "Hello!"
