@@ -56,7 +56,7 @@ class Student(Base):
         Date,
         nullable = False
     )
-    department: Mapped[str] = mapped_column(
+    dept_code: Mapped[str] = mapped_column(
         ForeignKey("departments.dept_code"),
         nullable = False
     )
