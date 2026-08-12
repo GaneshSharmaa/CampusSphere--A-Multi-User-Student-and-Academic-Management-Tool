@@ -23,7 +23,7 @@ from schemas.roles import RoleCreate, RoleResponse
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
 
 # Importing routes
-from routes import users, faculty, roles, departments
+from routes import users, faculty, roles, departments, students
 
 # Async database creation
 @asynccontextmanager
@@ -65,6 +65,13 @@ app.include_router(
     departments.router,
     prefix = "/department",
     tags = ["Department Management"]
+)
+
+# Include the `students` router
+app.include_router(
+    students.router,
+    prefix = "/student",
+    tags = ["Student Management"]
 )
 
 # -------- HOME ROUTE --------
