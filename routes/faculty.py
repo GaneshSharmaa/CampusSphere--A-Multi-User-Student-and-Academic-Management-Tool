@@ -26,16 +26,6 @@ async def create_faculty(
     access: Annotated[User, Depends(admin_access)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    faculty_exists = await db.scalar(
-        select(Faculty).where(Faculty.user_id == faculty.user_id)
-    )
-
-    if faculty_exists is not None:
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "Faculty already exists."
-        )
-
     user_exists = await db.scalar(
         select(User).where(User.id == faculty.user_id)
     )
@@ -44,6 +34,16 @@ async def create_faculty(
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "User not found."
+        )
+
+    faculty_exists = await db.scalar(
+        select(Faculty).where(Faculty.user_id == faculty.user_id)
+    )
+
+    if faculty_exists is not None:
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail = "Faculty already exists."
         )
 
     faculty_detail = Faculty(
