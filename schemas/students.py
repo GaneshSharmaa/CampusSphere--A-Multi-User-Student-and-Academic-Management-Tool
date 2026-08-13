@@ -7,7 +7,6 @@ from models.faculty import SexEnum
 
 # Schema for creating a student
 class StudentCreate(BaseModel):
-    roll_no: int
     user_id: int
     first_name: str
     last_name: str
