@@ -1,5 +1,5 @@
 # Importing required modules
-from fastapi import HTTPException, status, Depends, APIRouter
+from fastapi import HTTPException, status, Depends, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Annotated
@@ -12,7 +12,7 @@ from models.users import User
 from models.departments import Department
 
 # Importing the schemas
-from schemas.departments import CreateDepartment, ResponseDepartment, UpdateDepartment
+from schemas.departments import CreateDepartment, ResponseDepartment, UpdateDepartment, DeptQueryParam
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, principal_access
@@ -57,4 +57,25 @@ async def create_department(
     await db.refresh(new_dept)
 
     return new_dept
+
+# ---- GET ROUTE - GETTING INFORMATION ABOUT DEPARTMENT ----
+@router.get("/search", response_model = list[ResponseDepartment])
+async def get_dept_info(
+    dept: Annotated[DeptQueryParam, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    statement = select(Department)
+
+    if dept.dept_code:
+        statement = statement.where(
+            Department.dept_code.ilike(f"%{dept.dept_code}%")
+        )
+    if dept.dept_name:
+        statement = statement.where(
+            Department.dept_name.ilike(f"%{dept.dept_name}%")
+        )
+
+    results = await db.scalars(statement)
+    departments = results.all()
+    return departments
 
