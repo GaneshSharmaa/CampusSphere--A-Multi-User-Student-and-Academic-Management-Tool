@@ -17,7 +17,6 @@ class StudentCreate(BaseModel):
     dept_code: str
     start_batch_year: int
     end_batch_year: int
-    role_id: int
 
 # Schema for response model of a student
 class StudentResponse(BaseModel):
@@ -33,7 +32,6 @@ class StudentResponse(BaseModel):
     dept_code: str
     start_batch_year: int
     end_batch_year: int
-    role_id: int
     created_at: datetime
     updated_at: datetime
 
