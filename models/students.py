@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.users import User
-    from.departments import Department
+    from models.departments import Department
 
 class Student(Base):
     __tablename__ = "students"
