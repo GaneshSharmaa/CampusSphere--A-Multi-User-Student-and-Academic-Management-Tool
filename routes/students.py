@@ -1,5 +1,5 @@
 # Importing required modules
-from fastapi import HTTPException, status, Depends, APIRouter
+from fastapi import HTTPException, status, Depends, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Annotated
@@ -12,12 +12,76 @@ from models.users import User
 from models.students import Student
 
 # Importing the schemas
-from schemas.students import StudentCreate, StudentResponse
+from schemas.students import StudentCreate, StudentResponse, StudentQueryParams
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
 
 router = APIRouter()
+
+# ----------- GET STUDENT INFO ROUTE -----------
+@router.get("/search", response_model = list[StudentResponse])
+async def get_student_info(
+    param: Annotated[StudentQueryParams, Query()],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    # Check if current logged in user is in student table
+    student_chk = await db.scalar(
+        select(Student).where(Student.user_id == current_user.id)
+    )
+
+    # If yes, raise HTTP exception
+    if student_chk is not None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    # Query
+    query = select(Student)
+
+    # Query parameters
+    if param.first_name is not None:
+        query = query.where(
+            Student.first_name.ilike(f"%{param.first_name}%")
+        )
+    if param.last_name is not None:
+        query = query.where(
+            Student.last_name.ilike(f"%{param.last_name}%")
+        )
+    if param.dob is not None:
+        query = query.where(
+            Student.dob == param.dob
+        )
+    if param.sex is not None:
+        query = query.where(
+            Student.sex == param.sex
+        )
+    if param.address is not None:
+        query = query.where(
+            Student.address.ilike(f"%{param.address}%")
+        )
+    if param.date_of_admission is not None:
+        query = query.where(
+            Student.date_of_admission == param.date_of_admission
+        )
+    if param.dept_code is not None:
+        query = query.where(
+            Student.dept_code.ilike(f"%{param.dept_code}%")
+        )
+    if param.start_batch_year is not None:
+        query = query.where(
+            Student.start_batch_year == param.start_batch_year
+        )
+    if param.end_batch_year is not None:
+        query = query.where(
+            Student.end_batch_year == param.end_batch_year
+        )
+
+    result = await db.scalars(query)
+    students = result.all()
+    return students
 
 # ------- POST ROUTE - FOR CREATING A STUDENT -------
 @router.post("/create", response_model = StudentResponse)
