@@ -12,7 +12,7 @@ from models.users import User
 from models.students import Student
 
 # Importing the schemas
-from schemas.students import StudentCreate, StudentResponse, StudentQueryParams
+from schemas.students import StudentCreate, StudentResponse, StudentQueryParams, StudentUpdate
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
@@ -127,4 +127,33 @@ async def create_student(
     await db.refresh(student_detail)
 
     return student_detail
+
+# ------- PATCH ROUTE - UPDATE STUDENT INFORMATION -------
+@router.patch("/update/{student_id}", response_model = StudentResponse)
+async def update_student(
+    student_id: int,
+    student_detail: StudentUpdate,
+    access: Annotated[User, Depends(admin_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    # Check if student with student_id exists
+    student = await db.scalar(
+        select(Student).where(Student.id == student_id)
+    )
+
+    # If no, raise HTTP exception
+    if student is None:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Student doesn't exists."
+        )
+
+    for key, value in student_detail.model_dump(exclude_unset = True).items():
+        setattr(student, key, value)
+
+    db.add(student)
+    await db.commit()
+    await db.refresh(student)
+
+    return student
 
