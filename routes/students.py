@@ -157,3 +157,25 @@ async def update_student(
 
     return student
 
+# DELETE ROUTE - DELETE STUDENT INFORMATION
+@router.delete("/delete/{student_id}", status_code = status.HTTP_204_NO_CONTENT)
+async def delete_student(
+    student_id: int,
+    access: Annotated[User, Depends(admin_access)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    # Check if student with student_id exists
+    student = await db.scalar(
+        select(Student).where(Student.id == student_id)
+    )
+
+    # If no, raise HTTP exception
+    if student is None:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Student not found."
+        )
+
+    await db.delete(student)
+    await db.commit()
+
