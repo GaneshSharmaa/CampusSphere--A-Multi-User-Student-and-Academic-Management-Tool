@@ -8,8 +8,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.students import Student
-    from models.faculty import Faculty
+    from students.models import Student
+    from faculties.models import Faculty
 
 class Department(Base):
     __tablename__ = "departments"

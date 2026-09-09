@@ -9,21 +9,25 @@ from database.database import engine
 from database.dependencies import get_db
 
 # Importing database models
-from models.departments import Department
-from models.faculty import Faculty
-from models.roles import Role
-from models.students import Student
-from models.users import User
+from departments import routes
+from departments.models import Department
+from faculties.models import Faculty
+from faculties import routes
+from roles import routes
+from users.models import Role
+from students.models import Student
+from roles.models import User
 
 # Importing schemas
-from schemas.faculty import FacultyCreate, FacultyResponse
-from schemas.roles import RoleCreate, RoleResponse
+from faculties.schemas import FacultyCreate, FacultyResponse
+from roles.schemas import RoleCreate, RoleResponse
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
 
 # Importing routes
-from routes import users, faculty, roles, departments, students
+from students import routes
+from users import routes
 
 # Async database creation
 @asynccontextmanager
@@ -41,35 +45,35 @@ app = FastAPI(
 
 # Include the `users` router
 app.include_router(
-    users.router,
+    routes.router,
     prefix = "/user",
     tags = ["User Management"]
 )
 
 # Include the `faculty` router
 app.include_router(
-    faculty.router,
+    routes.router,
     prefix = "/faculty",
     tags = ["Faculty Management"]
 )
 
 # Include the `roles` router
 app.include_router(
-    roles.router,
+    routes.router,
     prefix = "/role",
     tags = ["Role Management"]
 )
 
 # Include the `departments` router
 app.include_router(
-    departments.router,
+    routes.router,
     prefix = "/department",
     tags = ["Department Management"]
 )
 
 # Include the `students` router
 app.include_router(
-    students.router,
+    routes.router,
     prefix = "/student",
     tags = ["Student Management"]
 )

@@ -3,7 +3,7 @@ from pydantic import BaseModel, PastDate, ConfigDict
 from datetime import date, datetime
 
 # Importing the Sex Enum for sex
-from models.faculty import SexEnum
+from faculties.models import SexEnum
 
 # Schema for creating faculty
 class FacultyCreate(BaseModel):

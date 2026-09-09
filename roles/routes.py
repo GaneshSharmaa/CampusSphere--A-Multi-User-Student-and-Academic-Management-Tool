@@ -5,14 +5,14 @@ from sqlalchemy import select, func
 from typing import Annotated
 
 # Importing the database models
-from models.roles import Role
-from models.users import User
+from users.models import Role
+from roles.models import User
 
 # Importing the database dependencies
 from database.dependencies import get_db
 
 # Importing the schemas
-from schemas.roles import RoleCreate, RoleResponse
+from roles.schemas import RoleCreate, RoleResponse
 
 # Importing the authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access

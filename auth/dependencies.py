@@ -1,8 +1,8 @@
 # Importing local module
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
-from models.users import User
-from models.faculty import Faculty
+from roles.models import User
+from faculties.models import Faculty
 
 # Importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession

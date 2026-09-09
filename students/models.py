@@ -1,37 +1,36 @@
-# importing local modules
+# importing the local module
 from database.database import Base
+from faculties.models import SexEnum
 
-# importing required modules
+# importing the required modules
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, Text, Integer, DateTime, Date, func, Identity
+from sqlalchemy import ForeignKey, String, Text, Integer, Sequence, Date, DateTime, func, Identity, CheckConstraint
 from sqlalchemy import Enum as SQLEnum
 from datetime import datetime, date
-from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.roles import Role
-    from models.departments import Department
-    from models.users import User
+    from roles.models import User
+    from departments.models import Department
 
-class SexEnum(Enum):
-    MALE = "Male"
-    FEMALE = "Female"
-    OTHER = "Other"
+class Student(Base):
+    __tablename__ = "students"
 
-class Faculty(Base):
-    __tablename__ = "faculty"
-
-    emp_id: Mapped[int] = mapped_column(
-        Identity(start = 2),
+    id: Mapped[int] = mapped_column(
         primary_key = True,
+        index = True
+    )
+    roll_no: Mapped[int] = mapped_column(
+        Identity(start = 1001),
+        unique = True,
+        nullable = False,
         index = True
     )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         unique = True,
         nullable = False,
-        index = True 
+        index = True
     )
     first_name: Mapped[str] = mapped_column(
         String(25),
@@ -53,7 +52,7 @@ class Faculty(Base):
         Text,
         nullable = False
     )
-    date_of_joining: Mapped[date] = mapped_column(
+    date_of_admission: Mapped[date] = mapped_column(
         Date,
         nullable = False
     )
@@ -61,8 +60,14 @@ class Faculty(Base):
         ForeignKey("departments.dept_code"),
         nullable = False
     )
-    role_id: Mapped[int] = mapped_column(
-        ForeignKey("roles.id"),
+    start_batch_year: Mapped[int] = mapped_column(
+        Integer,
+        CheckConstraint("start_batch_year >= 1970 AND start_batch_year <= 2100"),
+        nullable = False
+    )
+    end_batch_year: Mapped[int] = mapped_column(
+        Integer,
+        CheckConstraint("end_batch_year >= 1970 AND end_batch_year <= 2100"),
         nullable = False
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -78,15 +83,7 @@ class Faculty(Base):
     )
 
     # relationships
-    user: Mapped["User"] = relationship(
-        back_populates = "faculty"
-    )
-
-    role: Mapped["Role"] = relationship(
-        back_populates = "faculties"
-    )
-
     dept: Mapped["Department"] = relationship(
-        back_populates = "faculties"
+        back_populates = "students"
     )
 

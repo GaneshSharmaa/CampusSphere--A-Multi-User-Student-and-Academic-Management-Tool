@@ -8,9 +8,9 @@ from datetime import datetime, date
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.roles import Role
-    from models.students import Student
-    from models.faculty import Faculty
+    from users.models import Role
+    from students.models import Student
+    from faculties.models import Faculty
 
 class User(Base):
     __tablename__ = "users"

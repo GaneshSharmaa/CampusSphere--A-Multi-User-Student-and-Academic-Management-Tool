@@ -8,11 +8,11 @@ from typing import Annotated
 from database.dependencies import get_db
 
 # Importing the database models
-from models.users import User
-from models.departments import Department
+from roles.models import User
+from departments.models import Department
 
 # Importing the schemas
-from schemas.departments import CreateDepartment, ResponseDepartment, UpdateDepartment, DeptQueryParam
+from departments.schemas import CreateDepartment, ResponseDepartment, UpdateDepartment, DeptQueryParam
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, principal_access

@@ -7,8 +7,8 @@ from sqlalchemy import String, Integer
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.users import User
-    from models.faculty import Faculty
+    from roles.models import User
+    from faculties.models import Faculty
 
 class Role(Base):
     __tablename__ = "roles"

@@ -9,12 +9,12 @@ from typing import Annotated
 from database.dependencies import get_db
 
 # Importing the database models
-from models.users import User
-from models.faculty import Faculty
-from models.roles import Role
+from roles.models import User
+from faculties.models import Faculty
+from users.models import Role
 
 # Importing the schemas
-from schemas.faculty import FacultyCreate, FacultyResponse, FacultyUpdate, FacultyQueryParams
+from faculties.schemas import FacultyCreate, FacultyResponse, FacultyUpdate, FacultyQueryParams
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access

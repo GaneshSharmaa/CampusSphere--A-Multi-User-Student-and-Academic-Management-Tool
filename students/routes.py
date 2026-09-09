@@ -8,11 +8,11 @@ from typing import Annotated
 from database.dependencies import get_db
 
 # Importing the database models
-from models.users import User
-from models.students import Student
+from roles.models import User
+from students.models import Student
 
 # Importing the schemas
-from schemas.students import StudentCreate, StudentResponse, StudentQueryParams, StudentUpdate
+from students.schemas import StudentCreate, StudentResponse, StudentQueryParams, StudentUpdate
 
 # Importing authentication and authorization modules
 from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
