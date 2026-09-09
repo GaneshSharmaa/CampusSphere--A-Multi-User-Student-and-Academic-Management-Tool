@@ -3,7 +3,6 @@ import secrets, string
 from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends, HTTPException, status
 
 # Importing the database model
 from institutes.models import Institute
@@ -13,7 +12,7 @@ from database.dependencies import get_db
 
 # ------ FUNCTION FOR GENERATING UNIQUE CODES ------
 async def generate_code(
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: AsyncSession
 ):
     ALPHABETS = list(string.ascii_uppercase)
     NUMBERS = list(string.digits)
@@ -30,7 +29,7 @@ async def generate_code(
 
         code = "".join(list_code)
 
-        code_chk = await db.execute(
+        code_chk = await db.scalar(
             select(Institute).where(
                 Institute.institute_code == code
             )
@@ -38,6 +37,4 @@ async def generate_code(
 
         if code_chk is None:
             return code
-        else:
-            continue
 

@@ -24,7 +24,7 @@ async def create_institute(
     db: Annotated[AsyncSession, Depends(get_db)],
     institute: InstituteCreate
 ):
-    code = generate_code(db)
+    code = await generate_code(db)
     
     new_institute = Institute(
         institute_code = code,
