@@ -14,6 +14,7 @@ from faculties.models import Faculty
 from users.models import Role
 from students.models import Student
 from roles.models import User
+from institutes.models import Institute
 
 # importing the environment and os modules
 from os import getenv
