@@ -4,7 +4,6 @@ from datetime import datetime
 
 # Schema for creating an institution
 class InstituteCreate(BaseModel):
-    id: int
     institute_name: str
 
 # Schema for having institution response
