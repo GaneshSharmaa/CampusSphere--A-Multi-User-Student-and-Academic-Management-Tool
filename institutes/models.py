@@ -38,6 +38,3 @@ class Institute(Base):
         nullable = False
     )
 
-    # relationships
-    departments: Mapped["Department"] = relationship()
-    
