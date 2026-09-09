@@ -27,7 +27,10 @@ from auth.dependencies import get_current_user, admin_access, professor_access, 
 
 # Importing routes
 from students import routes
+from departments import routes
 from users import routes
+from roles import routes
+from faculties import routes
 
 # Async database creation
 @asynccontextmanager
