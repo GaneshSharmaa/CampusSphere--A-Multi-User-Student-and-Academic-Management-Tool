@@ -35,7 +35,7 @@ class Institute(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone = True),
         server_default = func.timezone("Asia/Kolkata", func.now()),
-        server_onupdate = func.timezone("Asia/Kolkata", func.now()),
+        onupdate = func.timezone("Asia/Kolkata", func.now()),
         nullable = False
     )
 
