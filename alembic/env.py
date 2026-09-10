@@ -11,7 +11,7 @@ from alembic import context
 from database.database import Base
 from departments.models import Department
 from faculties.models import Faculty
-from users.models import Role
+from roles.models import Role
 from students.models import Student
 from roles.models import User
 from institutes.models import Institute
