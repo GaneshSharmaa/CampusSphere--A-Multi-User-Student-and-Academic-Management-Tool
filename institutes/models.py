@@ -9,8 +9,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from departments.models import Department
-    from users.models import User
     from students.models import Student
+    from faculties.models import Faculty
+    from membership.models import Membership
+    from roles.models import Role
+    from programs.models import Program
 
 class Institute(Base):
     __tablename__ = "institutes"
@@ -41,11 +44,31 @@ class Institute(Base):
         nullable = False
     )
 
-    # relationships
-    students: Mapped[list["Student"]] = relationship(
-        back_populates = "institutes"
+    # relationship to membership database model
+    memberships: Mapped[list["Membership"]] = relationship(
+        back_populates = "institute"
     )
-    users: Mapped[list["User"]] = relationship(
-        back_populates = "institutes"
+
+    # relationship to roles database model
+    roles: Mapped[list["Role"]] = relationship()
+
+    # relationship to department database model
+    departments: Mapped[list["Department"]] = relationship(
+        back_populates = "institute"
+    )
+
+    # relationship to student database model
+    students: Mapped[list["Student"]] = relationship(
+        back_populates = "institute"
+    )
+
+    # relationship to faculty database model
+    faculties: Mapped[list["Faculty"]] = relationship(
+        back_populates = "institute"
+    )
+
+    # relationship to program database model
+    programs: Mapped[list["Program"]] = relationship(
+        back_populates = "institute"
     )
 
