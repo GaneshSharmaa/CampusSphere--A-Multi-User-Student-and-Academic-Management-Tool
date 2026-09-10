@@ -15,6 +15,7 @@ from roles.models import Role
 from students.models import Student
 from users.models import User
 from institutes.models import Institute
+from membership.models import Membership
 
 # importing the environment and os modules
 from os import getenv
