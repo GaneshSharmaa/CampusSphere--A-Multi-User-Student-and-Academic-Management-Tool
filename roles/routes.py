@@ -5,7 +5,7 @@ from sqlalchemy import select, func
 from typing import Annotated
 
 # Importing the database models
-from users.models import Role
+from roles.models import Role
 from roles.models import User
 
 # Importing the database dependencies

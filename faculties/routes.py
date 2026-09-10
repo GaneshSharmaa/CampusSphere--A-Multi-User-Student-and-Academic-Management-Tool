@@ -11,7 +11,7 @@ from database.dependencies import get_db
 # Importing the database models
 from roles.models import User
 from faculties.models import Faculty
-from users.models import Role
+from roles.models import Role
 
 # Importing the schemas
 from faculties.schemas import FacultyCreate, FacultyResponse, FacultyUpdate, FacultyQueryParams
