@@ -48,12 +48,12 @@ class User(Base):
     )
 
     # relationship to faculty database model
-    faculty: Mapped["Faculty" | None] = relationship(
+    faculty: Mapped["Faculty | None"] = relationship(
         back_populates = "user"
     )
 
     # relationship to student database model
-    student: Mapped["User" | None] = relationship(
+    student: Mapped["User | None"] = relationship(
         back_populates = "user"
     )
 
