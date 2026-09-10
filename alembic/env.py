@@ -13,7 +13,7 @@ from departments.models import Department
 from faculties.models import Faculty
 from roles.models import Role
 from students.models import Student
-from roles.models import User
+from users.models import User
 from institutes.models import Institute
 
 # importing the environment and os modules
