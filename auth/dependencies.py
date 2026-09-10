@@ -1,7 +1,7 @@
 # Importing local module
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
-from roles.models import User
+from users.models import User
 from faculties.models import Faculty
 
 # Importing the required module

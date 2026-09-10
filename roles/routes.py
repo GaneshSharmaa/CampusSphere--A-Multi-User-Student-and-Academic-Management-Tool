@@ -6,7 +6,7 @@ from typing import Annotated
 
 # Importing the database models
 from roles.models import Role
-from roles.models import User
+from users.models import User
 
 # Importing the database dependencies
 from database.dependencies import get_db

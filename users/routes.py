@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from database.dependencies import get_db
 
 # Importing the database models
-from roles.models import User
+from users.models import User
 
 # Importing the schemas
 from users.schemas import UserCreate, UserResponse, UserQueryParams

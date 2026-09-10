@@ -9,7 +9,7 @@ from typing import Annotated
 from database.dependencies import get_db
 
 # Importing the database models
-from roles.models import User
+from users.models import User
 from faculties.models import Faculty
 from roles.models import Role
 

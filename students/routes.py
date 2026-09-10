@@ -8,7 +8,7 @@ from typing import Annotated
 from database.dependencies import get_db
 
 # Importing the database models
-from roles.models import User
+from users.models import User
 from students.models import Student
 
 # Importing the schemas
