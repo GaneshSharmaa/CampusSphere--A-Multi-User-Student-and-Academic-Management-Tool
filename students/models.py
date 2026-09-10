@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from roles.models import User
     from departments.models import Department
+    from institutes.models import Institute
 
 class Student(Base):
     __tablename__ = "students"
@@ -60,6 +61,10 @@ class Student(Base):
         ForeignKey("departments.dept_code"),
         nullable = False
     )
+    institute_id: Mapped[int] = mapped_column(
+        ForeignKey("institutes.id"),
+        nullable = False
+    )
     start_batch_year: Mapped[int] = mapped_column(
         Integer,
         CheckConstraint("start_batch_year >= 1970 AND start_batch_year <= 2100"),
@@ -84,6 +89,9 @@ class Student(Base):
 
     # relationships
     dept: Mapped["Department"] = relationship(
+        back_populates = "students"
+    )
+    institutes: Mapped[list["Institute"]] = relationship(
         back_populates = "students"
     )
 

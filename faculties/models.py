@@ -10,7 +10,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from users.models import Role
+    from roles.models import Role
     from departments.models import Department
     from roles.models import User
 

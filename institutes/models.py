@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from departments.models import Department
+    from students.models import Student
 
 class Institute(Base):
     __tablename__ = "institutes"
@@ -37,5 +38,10 @@ class Institute(Base):
         server_default = func.timezone("Asia/Kolkata", func.now()),
         onupdate = func.timezone("Asia/Kolkata", func.now()),
         nullable = False
+    )
+
+    # relationships
+    students: Mapped[list["Student"]] = relationship(
+        back_populates = "institutes"
     )
 
