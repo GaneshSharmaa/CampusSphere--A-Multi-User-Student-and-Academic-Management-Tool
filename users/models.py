@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from students.models import Student
+    from institutes.models import Institute
     from faculties.models import Faculty
 
 class User(Base):
@@ -48,5 +49,8 @@ class User(Base):
     # relationships
     faculty: Mapped["Faculty"] = relationship(
         back_populates = "user"
+    )
+    institutes: Mapped[list["Institute"]] = relationship(
+        back_populates = "users"
     )
 
