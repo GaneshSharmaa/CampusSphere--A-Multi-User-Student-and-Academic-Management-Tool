@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from students.models import Student
     from institutes.models import Institute
+    from membership.models import Membership
     from faculties.models import Faculty
 
 class User(Base):
@@ -36,21 +37,28 @@ class User(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone = True),
-        server_default = func.now(),
+        server_default = func.timezone("Asia/Kolkata", func.now()),
         nullable = False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone = True),
-        server_default = func.now(),
-        onupdate = func.now(),
+        server_default = func.timezone("Asia/Kolkata", func.now()),
+        onupdate = func.timezone("Asia/Kolkata", func.now()),
         nullable = False
     )
 
-    # relationships
-    faculty: Mapped["Faculty"] = relationship(
+    # relationship to faculty database model
+    faculty: Mapped["Faculty" | None] = relationship(
         back_populates = "user"
     )
-    institutes: Mapped[list["Institute"]] = relationship(
-        back_populates = "users"
+
+    # relationship to student database model
+    student: Mapped["User" | None] = relationship(
+        back_populates = "user"
+    )
+
+    # relationship to membership database model
+    memberships: Mapped[list["Membership"]] = relationship(
+        back_populates = "user"
     )
 
