@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from roles.models import Role
     from departments.models import Department
-    from roles.models import User
+    from users.models import User
 
 class SexEnum(Enum):
     MALE = "Male"
@@ -65,6 +65,10 @@ class Faculty(Base):
         ForeignKey("roles.id"),
         nullable = False
     )
+    institute_id: Mapped[int] = mapped_column(
+        ForeignKey("institutes.id"),
+        nullable = False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone = True),
         server_default = func.timezone("Asia/Kolkata", func.now()),
@@ -73,7 +77,7 @@ class Faculty(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone = True),
         server_default = func.timezone("Asia/Kolkata", func.now()),
-        server_onupdate = func.timezone("Asia/Kolkata", func.now()),
+        onupdate = func.timezone("Asia/Kolkata", func.now()),
         nullable = False
     )
 

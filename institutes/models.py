@@ -50,7 +50,9 @@ class Institute(Base):
     )
 
     # relationship to roles database model
-    roles: Mapped[list["Role"]] = relationship()
+    roles: Mapped[list["Role"]] = relationship(
+        back_populates = "institute"
+    )
 
     # relationship to department database model
     departments: Mapped[list["Department"]] = relationship(
