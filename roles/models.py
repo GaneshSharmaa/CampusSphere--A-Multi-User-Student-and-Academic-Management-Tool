@@ -18,7 +18,7 @@ class Role(Base):
             "institute_id",
             "role_name",
             name="uq_role_institute_name"
-        )
+        ),
     )
 
     id: Mapped[int] = mapped_column(

@@ -20,7 +20,7 @@ class Department(Base):
             "institute_id",
             "dept_code",
             name = "uq_department_institute_code"
-        )
+        ),
     )
 
     id: Mapped[int] = mapped_column(

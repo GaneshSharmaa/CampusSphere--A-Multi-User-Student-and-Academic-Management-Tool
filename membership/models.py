@@ -20,7 +20,7 @@ class Membership(Base):
             "user_id",
             "institute_id",
             name="uq_user_institute"
-        )
+        ),
     )
 
     id: Mapped[int] = mapped_column(
