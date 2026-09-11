@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from users.models import User
     from departments.models import Department
     from institutes.models import Institute
+    from programs.models import Program
 
 class Student(Base):
     __tablename__ = "students"
@@ -90,6 +91,12 @@ class Student(Base):
         index = True
     )
 
+    program_id: Mapped[int] = mapped_column(
+        ForeignKey("programs.id"),
+        nullable = False,
+        index = True
+    )
+
     institute_id: Mapped[int] = mapped_column(
         ForeignKey("institutes.id"),
         nullable = False,
@@ -132,5 +139,10 @@ class Student(Base):
     # relationship to user database model
     user: Mapped["User"] = relationship(
         back_populates = "student"
+    )
+
+    # relationship to program database model
+    program: Mapped["Program"] = relationship(
+        back_populates = "students"
     )
 

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from membership.models import Membership
     from roles.models import Role
     from programs.models import Program
+    from subjects.models import Subject
 
 class Institute(Base):
     __tablename__ = "institutes"
@@ -71,6 +72,11 @@ class Institute(Base):
 
     # relationship to program database model
     programs: Mapped[list["Program"]] = relationship(
+        back_populates = "institute"
+    )
+
+    # relationship to subject database model
+    subjects: Mapped[list["Subject"]] = relationship(
         back_populates = "institute"
     )
 
