@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from institutes.models import Institute
     from programs.models import ProgramSubject
+    from marks.models import Mark
 
 class Subject(Base):
     __tablename__ = "subjects"
@@ -65,6 +66,11 @@ class Subject(Base):
 
     # relationship to ProgramSubject database model
     program_subjects: Mapped[list["ProgramSubject"]] = relationship(
+        back_populates = "subject"
+    )
+
+    # relationship to mark database model
+    marks: Mapped[list["Mark"]] = relationship(
         back_populates = "subject"
     )
 
