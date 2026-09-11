@@ -16,7 +16,8 @@ from students.models import Student
 from users.models import User
 from institutes.models import Institute
 from membership.models import Membership
-from programs.models import Program
+from programs.models import Program, ProgramSubject
+from subjects.models import Subject
 
 # importing the environment and os modules
 from os import getenv
