@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from departments.models import Department
     from users.models import User
     from institutes.models import Institute
+    from salary.models import Salary
 
 class SexEnum(Enum):
     MALE = "Male"
@@ -114,5 +115,10 @@ class Faculty(Base):
     # relationship to institute database model
     institute: Mapped["Institute"] = relationship(
         back_populates = "faculties"
+    )
+
+    # relationship to salary database model
+    salaries: Mapped[list["Salary"]] = relationship(
+        back_populates="faculty"
     )
 
