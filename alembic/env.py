@@ -18,6 +18,10 @@ from institutes.models import Institute
 from membership.models import Membership
 from programs.models import Program, ProgramSubject
 from subjects.models import Subject
+from attendance.models import Attendance
+from fees.models import Fee
+from marks.models import Mark
+from salary.models import Salary
 
 # importing the environment and os modules
 from os import getenv
