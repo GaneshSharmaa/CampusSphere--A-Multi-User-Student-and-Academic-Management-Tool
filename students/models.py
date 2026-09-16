@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from programs.models import Program
     from marks.models import Mark
     from attendance.models import Attendance
+    from fees.models import Fee
 
 class Student(Base):
     __tablename__ = "students"
@@ -155,6 +156,11 @@ class Student(Base):
 
     # relationship to attendance database model
     attendance: Mapped[list["Attendance"]] = relationship(
+        back_populates = "student"
+    )
+
+    # relationship to fees database model
+    fees: Mapped[list["Fee"]] = relationship(
         back_populates = "student"
     )
 
