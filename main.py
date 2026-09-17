@@ -8,6 +8,9 @@ from sqlalchemy import select
 from database.database import engine
 from database.dependencies import get_db
 
+# Importing all database models via models/__init__.py
+import models
+
 # Importing routes
 from students import routes as student_routes
 from departments import routes as department_routes
