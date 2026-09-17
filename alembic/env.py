@@ -22,6 +22,7 @@ from attendance.models import Attendance
 from fees.models import Fee
 from marks.models import Mark
 from salary.models import Salary
+from schedules.models import Schedule
 
 # importing the environment and os modules
 from os import getenv

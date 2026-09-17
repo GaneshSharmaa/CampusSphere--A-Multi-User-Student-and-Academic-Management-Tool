@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from institutes.models import Institute
     from students.models import Student
     from subjects.models import Subject
+    from schedules.models import Schedule
 
 class Program(Base):
     __tablename__ = "programs"
@@ -99,6 +100,11 @@ class Program(Base):
         back_populates = "program"
     )
 
+    # relationship to schedule database model
+    schedules: Mapped[list["Schedule"]] = relationship(
+        back_populates = "program"
+    )
+
 class ProgramSubject(Base):
     __tablename__ = "program_subjects"
 
@@ -143,10 +149,12 @@ class ProgramSubject(Base):
         ),
     )
 
+    # relationship to program database model
     program: Mapped["Program"] = relationship(
         back_populates = "program_subjects"
     )
 
+    # relationship to subject database model
     subject: Mapped["Subject"] = relationship(
         back_populates = "program_subjects"
     )
