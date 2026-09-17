@@ -53,7 +53,7 @@ class User(Base):
     )
 
     # relationship to student database model
-    student: Mapped["User | None"] = relationship(
+    student: Mapped["Student | None"] = relationship(
         back_populates = "user"
     )
 
