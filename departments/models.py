@@ -21,6 +21,11 @@ class Department(Base):
             "dept_code",
             name = "uq_department_institute_code"
         ),
+        UniqueConstraint(
+            "institute_id",
+            "dept_name",
+            name = "uq_department_institute_name"
+        ),
     )
 
     id: Mapped[int] = mapped_column(
@@ -37,7 +42,6 @@ class Department(Base):
 
     dept_name: Mapped[str] = mapped_column(
         String(50),
-        unique = True,
         index = True,
         nullable = False
     )
