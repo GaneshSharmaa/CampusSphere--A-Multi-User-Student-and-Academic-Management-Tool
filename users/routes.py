@@ -3,6 +3,7 @@ from fastapi import HTTPException, status, Depends, Query, APIRouter
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from fastapi.security import OAuth2PasswordRequestForm
 
 # Importing the database dependencies
@@ -10,6 +11,8 @@ from database.dependencies import get_db
 
 # Importing the database models
 from users.models import User
+from institutes.models import Institute
+from membership.models import Membership
 
 # Importing the schemas
 from users.schemas import UserCreate, UserResponse, UserQueryParams
@@ -30,7 +33,7 @@ async def create_new_user(
 ):
     # Checking if user with this email exists
     email_chk = await db.scalar(
-        select(User).where(user.email == User.email)
+        select(User).where(User.email == user.email)
     )
 
     # Checking if user with this phone exists
@@ -127,4 +130,20 @@ async def get_user_info(
     result = await db.scalars(statement)
     users = result.all()
     return users
+
+# -------- GET USER'S INSTITUTE ROUTE --------
+@router.get("/institutes")
+async def get_institutes(
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    statement = (
+        select(Membership)
+        .options(selectinload(Membership.institutes))
+        .where(user.id == Membership.user_id)
+    )
+
+    results = await db.scalars(statement)
+    memeberships = results.all()
+    return [membership.institute for membership in memeberships]
 
