@@ -18,6 +18,7 @@ from users import routes as user_routes
 from roles import routes as role_routes
 from faculties import routes as faculty_routes
 from institutes import routes as institute_routes
+from membership import routes as membership_routes
 
 # Async database creation
 @asynccontextmanager
@@ -73,6 +74,13 @@ app.include_router(
     institute_routes.router,
     prefix = "/institute",
     tags = ["Institute Management"]
+)
+
+# Include the `membership` router
+app.include_router(
+    membership_routes.router,
+    prefix = "/membership",
+    tags = ["Membership Management"]
 )
 
 # -------- HOME ROUTE --------
