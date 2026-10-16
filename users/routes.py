@@ -139,7 +139,7 @@ async def get_institutes(
 ):
     statement = (
         select(Membership)
-        .options(selectinload(Membership.institutes))
+        .options(selectinload(Membership.institute))
         .where(user.id == Membership.user_id)
     )
 
