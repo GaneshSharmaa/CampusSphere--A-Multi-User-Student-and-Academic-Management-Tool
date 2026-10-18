@@ -14,7 +14,7 @@ class FacultyCreate(BaseModel):
     sex: SexEnum
     address: str
     date_of_joining: date
-    dept_code: str
+    dept_id: int
     role_id: int
 
 # Schema for reponse faculty
@@ -27,7 +27,7 @@ class FacultyResponse(BaseModel):
     sex: SexEnum
     address: str
     date_of_joining: date
-    dept_code: str
+    dept_id: int
     role_id: int
     created_at: datetime
     updated_at: datetime
@@ -43,10 +43,18 @@ class FacultyUpdate(BaseModel):
     sex: SexEnum | None = None
     address: str | None = None
     date_of_joining: date | None = None
-    dept_code: str | None = None
-    role: str | None = None
+    dept_id: int | None = None
+    role_id: int | None = None
 
 # Schema for Faculty query parameter
-class FacultyQueryParams(FacultyUpdate):
-    pass
+class FacultyQueryParams(BaseModel):
+    user_id: int | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    dob: PastDate | None = None
+    sex: SexEnum | None = None
+    address: str | None = None
+    date_of_joining: date | None = None
+    dept_code: str | None = None
+    role_id: int | None = None
 

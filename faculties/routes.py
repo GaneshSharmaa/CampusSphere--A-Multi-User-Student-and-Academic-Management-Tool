@@ -12,6 +12,7 @@ from database.dependencies import get_db
 from users.models import User
 from faculties.models import Faculty
 from roles.models import Role
+from departments.models import Department
 
 # Importing the schemas
 from faculties.schemas import FacultyCreate, FacultyResponse, FacultyUpdate, FacultyQueryParams
@@ -47,15 +48,11 @@ async def get_faculty_info(
     if param.date_of_joining is not None:
         query = query.where(Faculty.date_of_joining == param.date_of_joining)
     if param.dept_code is not None:
-        query = query.where(Faculty.dept_code.ilike(f"%{param.dept_code}%"))
-    if param.role is not None:
-        query = query.join(
-            Faculty.role
-        ).options(
-            selectinload(Faculty.role)
-        ).where(
-            Role.role_name == param.role
+        query = query.join(Faculty.department).where(
+            Department.dept_code.ilike(f"%{param.dept_code}%")
         )
+    if param.role_id is not None:
+        query = query.where(Faculty.role_id == param.role_id)
 
     results = await db.scalars(query)
     faculties = results.all()
@@ -102,7 +99,7 @@ async def create_faculty(
         sex = faculty.sex,
         address = faculty.address,
         date_of_joining = faculty.date_of_joining,
-        dept_code = faculty.dept_code,
+        dept_id = faculty.dept_id,
         role_id = faculty.role_id,
     )
 
