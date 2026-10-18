@@ -41,7 +41,7 @@ async def get_current_user(
 
 # Function to authorize `Admin` users only
 async def admin_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty.role.role_name == "Admin":
+    if current_user.faculty is not None and current_user.faculty.role.role_name == "Admin":
         return current_user
 
     raise HTTPException(
@@ -51,7 +51,7 @@ async def admin_access(current_user: Annotated[User, Depends(get_current_user)])
 
 # Function to authorize `Professor` users only
 async def professor_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty.role.role_name == "Professor":
+    if current_user.faculty is not None and current_user.faculty.role.role_name == "Professor":
         return current_user
     raise HTTPException(
         status_code = status.HTTP_403_FORBIDDEN,
@@ -60,7 +60,7 @@ async def professor_access(current_user: Annotated[User, Depends(get_current_use
 
 # Function to authorize `HOD` users only
 async def hod_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty.role.role_name == "HOD":
+    if current_user.faculty is not None and current_user.faculty.role.role_name == "HOD":
         return current_user
     raise HTTPException(
         status_code = status.HTTP_403_FORBIDDEN,
@@ -69,7 +69,7 @@ async def hod_access(current_user: Annotated[User, Depends(get_current_user)]):
 
 # Function to authorize `Principal` users only
 async def principal_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty.role.role_name == "Principal":
+    if current_user.faculty is not None and current_user.faculty.role.role_name == "Principal":
         return current_user
     raise HTTPException(
         status_code = status.HTTP_403_FORBIDDEN,
@@ -81,7 +81,7 @@ async def access(
     current_user: Annotated[User, Depends(get_current_user)],
     access: list
 ):
-    if current_user.faculty.role.role_name in access:
+    if current_user.faculty is not None and current_user.faculty.role.role_name in access:
         return current_user
 
     raise HTTPException(
