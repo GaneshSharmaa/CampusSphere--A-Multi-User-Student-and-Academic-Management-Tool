@@ -26,8 +26,13 @@ async def create_role(
     access: Annotated[User, Depends(admin_access)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    institute_id = access.faculty.institute_id
+
     role_chk = await db.scalar(
-        select(Role).where(Role.role_name == role.role_name)
+        select(Role).where(
+            Role.role_name == role.role_name,
+            Role.institute_id == institute_id
+        )
     )
 
     if role_chk is not None:
@@ -36,7 +41,10 @@ async def create_role(
             detail = "Role already exists."
         )
 
-    new_role = Role(**role.model_dump())
+    new_role = Role(
+        **role.model_dump(),
+        institute_id = institute_id
+    )
 
     db.add(new_role)
     await db.commit()
