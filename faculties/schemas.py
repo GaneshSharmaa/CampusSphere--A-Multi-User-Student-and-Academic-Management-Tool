@@ -29,6 +29,7 @@ class FacultyResponse(BaseModel):
     date_of_joining: date
     dept_id: int
     role_id: int
+    institute_id: int
     created_at: datetime
     updated_at: datetime
 
