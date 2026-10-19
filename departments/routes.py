@@ -28,12 +28,18 @@ async def create_department(
 ):
     # Check if department code already exists
     dept_code_exists = await db.scalar(
-        select(Department).where(Department.dept_code == department.dept_code)
+        select(Department).where(
+            Department.dept_code == department.dept_code,
+            Department.institute_id == access.faculty.institute_id
+        )
     )
 
     # Check if deparment name already exists
     dept_name_exists = await db.scalar(
-        select(Department).where(Department.dept_name == department.dept_name)
+        select(Department).where(
+            Department.dept_name == department.dept_name,
+            Department.institute_id == access.faculty.institute_id
+        )
     )
 
     # If department code exists, raise HTTP exception
@@ -50,7 +56,10 @@ async def create_department(
             detail = f"Department name {dept_name_exists} already exists."
         )
 
-    new_dept = Department(**department.model_dump())
+    new_dept = Department(
+        **department.model_dump(),
+        institute_id = access.faculty.institute_id
+    )
 
     db.add(new_dept)
     await db.commit()
