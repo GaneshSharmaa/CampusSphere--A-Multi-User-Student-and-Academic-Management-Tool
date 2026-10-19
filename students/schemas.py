@@ -16,6 +16,7 @@ class StudentCreate(BaseModel):
     address: str
     date_of_admission: date
     dept_code: str
+    institute_id: int
     start_batch_year: int
     end_batch_year: int
 
