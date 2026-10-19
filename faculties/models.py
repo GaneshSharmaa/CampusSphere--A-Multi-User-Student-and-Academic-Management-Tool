@@ -26,8 +26,9 @@ class Faculty(Base):
     __tablename__ = "faculty"
 
     emp_id: Mapped[int] = mapped_column(
+        Identity(start = 2),
         primary_key = True,
-        index = True
+        index = True,
     )
 
     user_id: Mapped[int] = mapped_column(

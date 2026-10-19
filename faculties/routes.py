@@ -101,6 +101,7 @@ async def create_faculty(
         date_of_joining = faculty.date_of_joining,
         dept_id = faculty.dept_id,
         role_id = faculty.role_id,
+        institute_id = access.faculty.institute_id,
     )
 
     db.add(faculty_detail)
