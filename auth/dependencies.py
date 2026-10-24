@@ -2,7 +2,6 @@
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
 from users.models import User
-from faculties.models import Faculty
 
 # Importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,69 +26,17 @@ async def get_current_user(
 
     # Querying the database if user exists
     user = await db.scalar(
-        select(User).options(
-            selectinload(User.faculty)
-            .selectinload(User.memberships)
-            .selectinload(Faculty.role)
-        ).where(User.id == user_id)
+        select(User).where(User.id == user_id)
     )
 
     # Raising HTTP exception if not found
     if user is None:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
-            detail = "Cannot validate the user"
+            detail = "Cannot validate the user."
         )
 
     return user
 
-# Function to authorize `Admin` users only
-async def admin_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty is not None and current_user.faculty.role.role_name == "Admin":
-        return current_user
-
-    raise HTTPException(
-        status_code = status.HTTP_403_FORBIDDEN,
-        detail = "Not authorized."
-    )
-
-# Function to authorize `Professor` users only
-async def professor_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty is not None and current_user.faculty.role.role_name == "Professor":
-        return current_user
-    raise HTTPException(
-        status_code = status.HTTP_403_FORBIDDEN,
-        detail = "Not authorized."
-    )
-
-# Function to authorize `HOD` users only
-async def hod_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty is not None and current_user.faculty.role.role_name == "HOD":
-        return current_user
-    raise HTTPException(
-        status_code = status.HTTP_403_FORBIDDEN,
-        detail = "Not authorized."
-    )
-
-# Function to authorize `Principal` users only
-async def principal_access(current_user: Annotated[User, Depends(get_current_user)]):
-    if current_user.faculty is not None and current_user.faculty.role.role_name == "Principal":
-        return current_user
-    raise HTTPException(
-        status_code = status.HTTP_403_FORBIDDEN,
-        detail = "Not authorized."
-    )
-
-# Function to authorize a list of roles
-async def access(
-    current_user: Annotated[User, Depends(get_current_user)],
-    access: list
-):
-    if current_user.faculty is not None and current_user.faculty.role.role_name in access:
-        return current_user
-
-    raise HTTPException(
-        status_code = status.HTTP_403_FORBIDDEN,
-        detail = "Not authorized."
-    )
-
+# Creating a dependency for getting the membership of the user
+async def 
