@@ -16,12 +16,12 @@ from membership.models import Membership
 
 # Importing the schemas
 from users.schemas import UserCreate, UserResponse, UserQueryParams
-from auth.schemas import Token
+from auth.schemas import Token, InstituteSummary
 
 # Importing authentication and authorization modules
 from auth.hashing import hash_password, verify_password
 from auth.jwt import create_access_token
-from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
+from auth.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -113,11 +113,56 @@ async def my_profile(
 ):
     return current_user
 
+# ------------ Getting the list of all institutes ------------
+@router.get("/me/institutes", response_model = list[InstituteSummary])
+async def get_all_institutes(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    memberships = await db.scalars(
+        select(Institute).join(Membership).where(
+            Membership.user_id == current_user.id
+        )
+    )
+
+    return memberships.all()
+
+# -------- Selecting an active institute --------
+@router.post("/me/active-institute", response_model = Token)
+async def active_institute(
+    institute_id: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    membership = await db.scalar(
+        select(Membership).where(
+            Membership.user_id == current_user.id,
+            Membership.institute_id == institute_id
+        )
+    )
+
+    if membership is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    new_token = create_access_token(
+        data = {
+            "sub": str(current_user.id),
+            "institute_id": str(institute_id)
+        }
+    )
+
+    return {
+        "access_token": new_token,
+        "token_type": "bearer"
+    }
+
 # -------- GET USER ROUTE (QUERY PARAMETER) --------
 @router.get("/search", response_model = list[UserResponse])
 async def get_user_info(
     user: Annotated[UserQueryParams, Query()],
-    admin_access: Annotated[User, Depends(admin_access)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
     statement = select(User)
@@ -130,20 +175,4 @@ async def get_user_info(
     result = await db.scalars(statement)
     users = result.all()
     return users
-
-# -------- GET USER'S INSTITUTE ROUTE --------
-@router.get("/institutes")
-async def get_institutes(
-    user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    statement = (
-        select(Membership)
-        .options(selectinload(Membership.institute))
-        .where(user.id == Membership.user_id)
-    )
-
-    results = await db.scalars(statement)
-    memeberships = results.all()
-    return [membership.institute for membership in memeberships]
 
