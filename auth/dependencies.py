@@ -39,4 +39,8 @@ async def get_current_user(
     return user
 
 # Creating a dependency for getting the membership of the user
-async def 
+async def get_user_membership(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> int:
+    pass

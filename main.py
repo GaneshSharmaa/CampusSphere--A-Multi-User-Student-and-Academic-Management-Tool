@@ -40,7 +40,7 @@ app.include_router(
     prefix = "/user",
     tags = ["User Management"]
 )
-
+'''
 # Include the `faculty` router
 app.include_router(
     faculty_routes.router,
@@ -82,7 +82,7 @@ app.include_router(
     prefix = "/membership",
     tags = ["Membership Management"]
 )
-
+'''
 # -------- HOME ROUTE --------
 @app.get("/", include_in_schema = False)
 async def home():
