@@ -2,6 +2,7 @@
 from auth.jwt import verify_access_token
 from database.dependencies import get_db
 from users.models import User
+from membership.models import Membership
 
 # Importing the required module
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +42,25 @@ async def get_current_user(
 # Creating a dependency for getting the membership of the user
 async def get_user_membership(
     db: Annotated[AsyncSession, Depends(get_db)],
+    token: Annotated[str, Depends(oauth2scheme)],
     current_user: Annotated[User, Depends(get_current_user)]
-) -> int:
-    pass
+) -> Membership:
+    payload = verify_access_token(token)
+
+    institute_id = int(payload["institute_id"])
+
+    membership = await db.scalar(
+        select(Membership).where(
+            Membership.user_id == current_user.id,
+            Membership.institute_id == institute_id
+        )
+    )
+
+    if membership is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    return membership
+
