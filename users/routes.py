@@ -127,7 +127,8 @@ async def get_all_institutes(
 
     return memberships.all()
 
-# -------- Selecting an active institute --------
+'''
+# -------- SELECT AN ACTIVE INSTITUTE (using JWT) --------
 @router.post("/me/active-institute", response_model = Token)
 async def active_institute(
     institute_id: int,
@@ -158,6 +159,7 @@ async def active_institute(
         "access_token": new_token,
         "token_type": "bearer"
     }
+'''
 
 # -------- GET USER ROUTE (QUERY PARAMETER) --------
 @router.get("/search", response_model = list[UserResponse])
