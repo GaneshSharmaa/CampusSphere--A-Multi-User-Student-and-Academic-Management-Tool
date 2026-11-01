@@ -8,37 +8,12 @@ from users.models import User
 from students.models import Student
 from membership.models import Membership
 from departments.models import Department
-from faculties.models import Faculty
 from programs.models import Program
+from auth.dependencies import get_user_institute_id_for_user
 
 # Importing the schemas
 from students.schemas import StudentCreate, StudentQueryParams, StudentResponse, StudentUpdate
 
-
-async def get_user_institute_id(
-    db: AsyncSession,
-    current_user: User
-) -> int:
-    faculty_institute_id = await db.scalar(
-        select(Faculty.institute_id).where(Faculty.user_id == current_user.id)
-    )
-    if faculty_institute_id is not None:
-        return faculty_institute_id
-
-    institute_ids = (
-        await db.scalars(
-            select(Membership.institute_id)
-            .where(Membership.user_id == current_user.id)
-            .order_by(Membership.id)
-        )
-    ).all()
-    if len(institute_ids) != 1:
-        raise HTTPException(
-            status_code = status.HTTP_403_FORBIDDEN,
-            detail = "User must belong to exactly one institute.",
-        )
-
-    return institute_ids[0]
 
 # ----- For fetching the students using query parameters -----
 async def search_student(
@@ -46,7 +21,7 @@ async def search_student(
     param: StudentQueryParams,
     current_user: User
 ) -> list[Student]:
-    institute_id = await get_user_institute_id(db, current_user)
+    institute_id = await get_user_institute_id_for_user(db, current_user)
 
     # Check if current logged in user is in student table
     student_chk = await db.scalar(
@@ -113,7 +88,7 @@ async def create_new_student(
     student_data: StudentCreate,
     current_user: User
 ) -> Student:
-    institute_id = await get_user_institute_id(db, current_user)
+    institute_id = await get_user_institute_id_for_user(db, current_user)
 
     user_exists = await db.scalar(
         select(User)
