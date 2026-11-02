@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from users.models import User
     from institutes.models import Institute
+    from faculties.models import Faculty
 
 # Creating the database model
 class Membership(Base):
@@ -54,5 +55,10 @@ class Membership(Base):
     # relationship to institute database model
     institute: Mapped["Institute"] = relationship(
         back_populates = "memberships"
+    )
+
+    # relationship to faculty database model
+    faculty: Mapped["Faculty"] = relationship(
+        back_populates = "membership"
     )
 
