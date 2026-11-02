@@ -38,3 +38,14 @@ async def generate_code(
         if code_chk is None:
             return code
 
+# ------ FUNCTION FOR CHECKING IF THE INSTITUTE EXISTS ------
+async def chk_institute_exists(
+    db: AsyncSession,
+    institute_id: int,
+) -> Institute | None:
+    institute_exists = await db.scalar(
+        select(Institute).where(Institute.id == institute_id)
+    )
+
+    return institute_exists
+
