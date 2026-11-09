@@ -15,7 +15,7 @@ from departments.models import Department
 from departments.schemas import CreateDepartment, ResponseDepartment, UpdateDepartment, DeptQueryParam
 
 # Importing authentication and authorization modules
-from auth.dependencies import get_current_user, admin_access, principal_access
+from auth.role_based_access import admin_access
 
 router = APIRouter()
 

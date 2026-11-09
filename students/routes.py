@@ -13,7 +13,8 @@ from users.models import User
 from students.schemas import StudentCreate, StudentResponse, StudentQueryParams, StudentUpdate
 
 # Importing authentication and authorization modules
-from auth.dependencies import get_current_user, admin_access, professor_access, hod_access, principal_access
+from auth.dependencies import get_current_user
+from auth.role_based_access import admin_access
 
 # Importing the services
 from students.service import (
