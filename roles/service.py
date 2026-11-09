@@ -2,21 +2,19 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-# Importing the Role database model
+# Importing the Role database model, schemas
 from roles.models import Role
+from roles.schemas import RoleCreate, RoleResponse
 
-# Importing the database dependencies
+# Importing the dependencies
 from database.dependencies import get_db
 from auth.dependencies import get_current_user_institute_membership, get_current_user
-
-# Importing the Role schemas
-from roles.schemas import RoleCreate, RoleResponse
 
 async def chk_role_exists(
     db: AsyncSession,
     role_name: str,
     institute_id: int
-):
+) -> Role | None:
     role_exists = await db.scalar(
         select(Role).where(
             Role.role_name == role_name,
@@ -24,18 +22,21 @@ async def chk_role_exists(
         )
     )
 
+    return role_exists
+
+
 async def create_new_role(
     role_data: RoleCreate,
     institute_id: int,
     db: AsyncSession
-):
-    role_chk = await chk_role_exists(
+) -> Role | None:
+    existing_role = await chk_role_exists(
         db = db,
         role_name = role_data.role_name,
         institute_id = institute_id
     )
 
-    if role_chk is not None:
+    if existing_role is not None:
         return None
 
     new_role = Role(
