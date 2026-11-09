@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# FUNCTION FOR ONLY ADMIN ACCESS
 async def admin_access(
     institute_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -19,6 +20,27 @@ async def admin_access(
     )
 
     if membership_chk is None or membership_chk.faculty.role.role_name != "Admin":
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    return membership_chk
+
+
+# FUNCTION FOR ONLY TEACHER ACCESS
+async def teacher_access(
+    institute_id: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    membership_chk = await get_current_user_institute_membership(
+        db = db,
+        current_user = current_user,
+        institute_id = institute_id
+    )
+
+    if membership_chk is None or membership_chk.faculty.role.role_name != "Teacher":
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "Not authorized."
