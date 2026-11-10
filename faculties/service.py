@@ -13,12 +13,19 @@ from users.service import get_user_by_id
 
 
 # Function to check if faculty exists or not
-async def chk_faculty_exists(user_id: int, institute_id: int, db: AsyncSession) -> Faculty | None:
+async def chk_faculty_exists(
+    user_id: int,
+    institute_id: int,
+    db: AsyncSession
+) -> Faculty | None:
     """
     Fetches a faculty from the database by their unique ID.
     Returns the Faculty database model object if found, otherwise returns None.
     """
-    statement = select(Faculty).where(Faculty.id == user_id)
+    statement = select(Faculty).where(
+        Faculty.user_id == user_id,
+        Faculty.institute_id == institute_id
+    )
 
     faculty = await db.scalar(statement)
 
@@ -29,7 +36,7 @@ async def add_faculty(db: AsyncSession, faculty: FacultyCreate, institute_id: in
     """
     Validate the business requirements and creates a new faculty records.
     """
-    user_exists = get_user_by_id(user_id = faculty.user_id, db = db)
+    user_exists = await get_user_by_id(user_id = faculty.user_id, db = db)
 
     if user_exists is None:
         raise HTTPException(
@@ -37,7 +44,7 @@ async def add_faculty(db: AsyncSession, faculty: FacultyCreate, institute_id: in
             detail = "User not found."
         )
 
-    faculty_exists = chk_faculty_exists(user_id = faculty.user_id, institute_id = institute_id, db = db)
+    faculty_exists = await chk_faculty_exists(user_id = faculty.user_id, institute_id = institute_id, db = db)
 
     if faculty_exists is not None:
         raise HTTPException(

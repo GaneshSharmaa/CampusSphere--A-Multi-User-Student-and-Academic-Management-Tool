@@ -9,7 +9,6 @@ from students.models import Student
 from membership.models import Membership
 from departments.models import Department
 from programs.models import Program
-from auth.dependencies import get_user_institute_id_for_user
 
 # Importing the schemas
 from students.schemas import StudentCreate, StudentQueryParams, StudentResponse, StudentUpdate
@@ -19,14 +18,12 @@ from students.schemas import StudentCreate, StudentQueryParams, StudentResponse,
 async def search_student(
     db: AsyncSession,
     param: StudentQueryParams,
-    current_user: User
+    institute_id: int
 ) -> list[Student]:
-    institute_id = await get_user_institute_id_for_user(db, current_user)
-
     # Check if current logged in user is in student table
     student_chk = await db.scalar(
         select(Student).where(
-            Student.user_id == current_user.id
+            Student.user_id == User.id
         )
     )
 
@@ -86,10 +83,8 @@ async def search_student(
 async def create_new_student(
     db: AsyncSession,
     student_data: StudentCreate,
-    current_user: User
+    institute_id: int
 ) -> Student:
-    institute_id = await get_user_institute_id_for_user(db, current_user)
-
     user_exists = await db.scalar(
         select(User)
         .join(Membership, Membership.user_id == User.id)
@@ -120,6 +115,7 @@ async def create_new_student(
         Department.dept_code == student_data.dept_code,
         Department.institute_id == institute_id,
     ))
+    
     if department is None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -131,6 +127,7 @@ async def create_new_student(
         Program.institute_id == institute_id,
         Program.department_id == department.id,
     ))
+    
     if program is None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -155,10 +152,8 @@ async def update_student(
     db: AsyncSession,
     student_id: int,
     student_data: StudentUpdate,
-    current_user: User
+    institute_id: int
 ) -> Student:
-    institute_id = await get_user_institute_id(db, current_user)
-
     # Check if student with student_id exists
     student = await db.scalar(
         select(Student).where(
@@ -175,17 +170,20 @@ async def update_student(
         )
 
     update_data = student_data.model_dump(exclude_unset=True)
+    
     if "dept_code" in update_data:
         department = await db.scalar(select(Department).where(
             Department.dept_code == update_data.pop("dept_code"),
             Department.institute_id == institute_id,
         ))
-        if department is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Department not found in the current institute.",
-            )
-        update_data["dept_id"] = department.id
+        
+    if department is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Department not found in the current institute.",
+        )
+    
+    update_data["dept_id"] = department.id
 
     for key, value in update_data.items():
         setattr(student, key, value)
@@ -200,10 +198,8 @@ async def update_student(
 async def delete_student(
     db: AsyncSession,
     student_id: int,
-    current_user: User
+    institute_id: int
 ) -> None:
-    institute_id = await get_user_institute_id(db, current_user)
-
     # Check if student with student_id exists
     student = await db.scalar(
         select(Student).where(
