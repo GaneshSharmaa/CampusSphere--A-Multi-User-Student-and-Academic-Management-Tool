@@ -2,7 +2,7 @@
 <h1>CampusSphere: A Multi-User Student and Academic Management Tool</h1>
 </center>
 
-**(The previous project repo was taken private by me, as the plan for how this was going to be build changed).**
+**Currently, again under repair work, right now this is not working properly, the project now has some serious bugs, I'm trying to fix it. (Updated on: Nov 11th, 2026) This will disclaimer will be gone, once it is fixed. Thanks.**
 
 (Currently, this project is under active development; I'm working on its backend architecture and design; later, the frontend and UI will also be added. Features are being implemented incrementally with a focus on writing clean, maintainable, and production-oriented code rather than rapidly adding functionality).
 
