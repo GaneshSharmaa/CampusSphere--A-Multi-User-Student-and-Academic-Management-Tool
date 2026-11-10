@@ -43,7 +43,6 @@ class Membership(Base):
 
     role_id: Mapped[int] = mapped_column(
         ForeignKey("roles.id"),
-        nullable = False,
         index = True
     )
 
@@ -65,6 +64,6 @@ class Membership(Base):
 
     # relationship to role database model
     role: Mapped["Role"] = relationship(
-        back_populates = "membership"
+        back_populates = "memberships"
     )
 

@@ -17,7 +17,7 @@ async def admin_access(
         institute_id = institute_id
     )
 
-    if membership_exists is None or membership_exists.faculty.role.role_name != "Admin":
+    if membership_exists is None or membership_exists.role.role_name != "Admin":
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "Not authorized."
@@ -38,7 +38,7 @@ async def teacher_access(
             institute_id = institute_id
         )
     
-    if membership_exists is None or membership_exists.faculty.role.role_name != "Teacher":
+    if membership_exists is None or membership_exists.role.role_name != "Teacher":
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "Not authorized."

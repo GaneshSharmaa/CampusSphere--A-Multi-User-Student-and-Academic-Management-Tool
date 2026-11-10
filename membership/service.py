@@ -39,6 +39,7 @@ async def create_membership(
     membership = Membership(
         user_id = current_user.id,
         institute_id = membership_data.institute_id,
+        role_id = membership_data.role_id
     )
     db.add(membership)
 

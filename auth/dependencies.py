@@ -73,7 +73,9 @@ async def get_current_user_institute_membership(
     institute_id: Annotated[int, Header(alias = "X-Institute-ID")]
 ) -> Membership:
     membership = await db.scalar(
-        select(Membership).where(
+        select(Membership)
+        .options(selectinload(Membership.role))
+        .where(
             Membership.user_id == current_user.id,
             Membership.institute_id == institute_id
         )
