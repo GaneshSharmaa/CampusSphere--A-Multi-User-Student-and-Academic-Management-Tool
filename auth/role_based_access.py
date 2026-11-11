@@ -24,4 +24,6 @@ def require_role(*required_role: str):
 require_admin = require_role("Admin")
 # Principal access
 require_principal = require_role("Principal")
+# Teacher access
+require_teacher = require_role("Teacher")
 
