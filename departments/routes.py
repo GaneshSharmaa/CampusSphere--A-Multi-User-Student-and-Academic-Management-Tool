@@ -1,90 +1,101 @@
 # Importing required modules
-from fastapi import HTTPException, status, Depends, APIRouter, Query
+from fastapi import HTTPException, status, Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from typing import Annotated
 
 # Importing the database dependencies
 from database.dependencies import get_db
 
 # Importing the database models
-from users.models import User
-from departments.models import Department
-
+from membership.models import Membership
 # Importing the schemas
 from departments.schemas import CreateDepartment, ResponseDepartment, UpdateDepartment, DeptQueryParam
+from departments.service import search_departments, create_new_department, update_department, delete_department
+from departments.exceptions import DepartmentNotFoundError, DuplicateDepartmentError
 
 # Importing authentication and authorization modules
-from auth.role_based_access import admin_access
+from auth.role_based_access import require_admin
 
 router = APIRouter()
 
-# ------- POST ROUTE - CREATE DEPARTMENT ROUTE -------
-@router.post("/create", response_model = ResponseDepartment)
+
+# Route for getting the department
+@router.get("/departments", response_model = list[ResponseDepartment])
+async def search_dept(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    membership: Annotated[Membership, Depends(require_admin)],
+    department_data: Annotated[DeptQueryParam, Depends()]
+):
+    return await search_departments(
+        db = db,
+        institute_id = membership.institute_id,
+        params = department_data
+    )
+
+
+# Route for creating a department
+@router.post("/create-department", response_model = ResponseDepartment)
 async def create_department(
-    department: CreateDepartment,
-    access: Annotated[User, Depends(admin_access)],
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
+    membership: Annotated[Membership, Depends(require_admin)],
+    department_data: CreateDepartment
 ):
-    # Check if department code already exists
-    dept_code_exists = await db.scalar(
-        select(Department).where(
-            Department.dept_code == department.dept_code,
-            Department.institute_id == access.faculty.institute_id
+    try:
+        return await create_new_department(
+            db = db,
+            institute_id = membership.institute_id,
+            department_data = department_data
         )
-    )
-
-    # Check if deparment name already exists
-    dept_name_exists = await db.scalar(
-        select(Department).where(
-            Department.dept_name == department.dept_name,
-            Department.institute_id == access.faculty.institute_id
-        )
-    )
-
-    # If department code exists, raise HTTP exception
-    if dept_code_exists is not None:
+    except DuplicateDepartmentError as error:
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
-            detail = f"Department code {dept_code_exists} already exists."
-        )
+            detail = str(error),
+        ) from error
 
-    # If department name exists, raise HTTP exception
-    if dept_name_exists is not None:
+
+# Route for updating a department
+@router.patch("/update-department/{department_id}", response_model = ResponseDepartment)
+async def update_department_route(
+    department_id: int,
+    department_data: UpdateDepartment,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    membership: Annotated[Membership, Depends(require_admin)],
+):
+    try:
+        return await update_department(
+            db = db,
+            institute_id = membership.institute_id,
+            department_id = department_id,
+            department_data = department_data,
+        )
+    except DepartmentNotFoundError as error:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = str(error),
+        ) from error
+    except DuplicateDepartmentError as error:
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
-            detail = f"Department name {dept_name_exists} already exists."
-        )
+            detail = str(error),
+        ) from error
 
-    new_dept = Department(
-        **department.model_dump(),
-        institute_id = access.faculty.institute_id
-    )
 
-    db.add(new_dept)
-    await db.commit()
-    await db.refresh(new_dept)
-
-    return new_dept
-
-# ---- GET ROUTE - GETTING INFORMATION ABOUT DEPARTMENT ----
-@router.get("/search", response_model = list[ResponseDepartment])
-async def get_dept_info(
-    dept: Annotated[DeptQueryParam, Query()],
-    db: Annotated[AsyncSession, Depends(get_db)]
+# Route for deleting a department
+@router.delete("/delete-department/{department_id}", status_code = status.HTTP_204_NO_CONTENT)
+async def delete_department_route(
+    department_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    membership: Annotated[Membership, Depends(require_admin)],
 ):
-    statement = select(Department)
-
-    if dept.dept_code:
-        statement = statement.where(
-            Department.dept_code.ilike(f"%{dept.dept_code}%")
+    try:
+        await delete_department(
+            db = db,
+            institute_id = membership.institute_id,
+            department_id = department_id,
         )
-    if dept.dept_name:
-        statement = statement.where(
-            Department.dept_name.ilike(f"%{dept.dept_name}%")
-        )
-
-    results = await db.scalars(statement)
-    departments = results.all()
-    return departments
+    except DepartmentNotFoundError as error:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = str(error),
+        ) from error
 
