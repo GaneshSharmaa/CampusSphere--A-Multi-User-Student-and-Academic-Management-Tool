@@ -1,164 +1,125 @@
 # Importing required modules
 from fastapi import HTTPException, status, Depends, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
 from typing import Annotated
 
 # Importing the database dependencies
 from database.dependencies import get_db
 
-# Importing the database models
-from users.models import User
-from faculties.models import Faculty
-from roles.models import Role
-from departments.models import Department
-
 # Importing the schemas
 from faculties.schemas import FacultyCreate, FacultyResponse, FacultyUpdate, FacultyQueryParams
 
 # Importing authentication and authorization modules
-from auth.role_based_access import admin_access
+from auth.role_based_access import require_admin
+
+# Importing the faculty services
+from faculties.service import (
+    add_faculty,
+    delete_faculty as delete_faculty_service,
+    search_faculties,
+    update_faculty,
+)
+
+# Importing the exceptions
+from faculties.exceptions import (
+    DuplicateFacultyError,
+    FacultyNotFoundError,
+    FacultyReferenceNotFoundError,
+)
+
+# Importing the membership model
+from membership.models import Membership
 
 router = APIRouter()
+
 
 # ------ GET FACULTY INFORMATION ROUTE BY QUERY PARAMETER ------
 @router.get("/search", response_model = list[FacultyResponse])
 async def get_faculty_info(
     param: Annotated[FacultyQueryParams, Query()],
-    access: Annotated[User, Depends(admin_access)],
+    membership: Annotated[Membership, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    # Query
-    query = select(Faculty)
+    return await search_faculties(
+        db = db,
+        institute_id = membership.institute_id,
+        params = param,
+    )
 
-    # Query parameter for each field
-    if param.user_id is not None:
-        query = query.where(Faculty.user_id.ilike(param.user_id))
-    if param.first_name is not None:
-        query = query.where(Faculty.first_name.ilike(f"%{param.first_name}%"))
-    if param.last_name is not None:
-        query = query.where(Faculty.last_name.ilike(f"%{param.last_name}%"))
-    if param.dob is not None:
-        query = query.where(Faculty.dob == param.dob)
-    if param.sex is not None:
-        query = query.where(Faculty.sex == param.sex)
-    if param.address is not None:
-        query = query.where(Faculty.address.ilike(f"%{param.address}%"))
-    if param.date_of_joining is not None:
-        query = query.where(Faculty.date_of_joining == param.date_of_joining)
-    if param.dept_code is not None:
-        query = query.join(Faculty.department).where(
-            Department.dept_code.ilike(f"%{param.dept_code}%")
-        )
-    if param.role_id is not None:
-        query = query.where(Faculty.role_id == param.role_id)
-
-    results = await db.scalars(query)
-    faculties = results.all()
-
-    return faculties
 
 # --------- CREATING FACULTY ROUTE ---------
 @router.post("/create", response_model = FacultyResponse)
 async def create_faculty(
     faculty: FacultyCreate,
-    access: Annotated[User, Depends(admin_access)],
+    membership: Annotated[Membership, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    # Check if user exists
-    user_exists = await db.scalar(
-        select(User).where(User.id == faculty.user_id)
-    )
-
-    # If not, raise HTTP exception
-    if user_exists is None:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = "User not found."
+    try:
+        return await add_faculty(
+            db = db,
+            faculty = faculty,
+            institute_id = membership.institute_id,
         )
-
-    # Check if the faculty exists
-    faculty_exists = await db.scalar(
-        select(Faculty).where(Faculty.user_id == faculty.user_id)
-    )
-
-    # If yes, raise HTTP exception
-    if faculty_exists is not None:
+    except DuplicateFacultyError as error:
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
-            detail = "Faculty already exists."
-        )
+            detail = str(error)
+        ) from error
+    except FacultyReferenceNotFoundError as error:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = str(error)
+        ) from error
 
-    # Object
-    faculty_detail = Faculty(
-        user_id = faculty.user_id,
-        first_name = faculty.first_name,
-        last_name = faculty.last_name,
-        dob = faculty.dob,
-        sex = faculty.sex,
-        address = faculty.address,
-        date_of_joining = faculty.date_of_joining,
-        dept_id = faculty.dept_id,
-        role_id = faculty.role_id,
-        institute_id = access.faculty.institute_id,
-    )
-
-    db.add(faculty_detail)
-    await db.commit()
-    await db.refresh(faculty_detail)
-
-    return faculty_detail
 
 # ------- UPDATE FACULTY INFORMATION ROUTE -------
 @router.patch("/update/{emp_id}", response_model = FacultyResponse)
 async def partial_update_faculty(
     emp_id: int,
     faculty: FacultyUpdate,
-    access: Annotated[AsyncSession, Depends(admin_access)],
+    membership: Annotated[Membership, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    # Check if the faculty exists
-    updated_faculty = await db.scalar(
-        select(Faculty).where(Faculty.emp_id == emp_id)
-    )
-
-    # If not, raise HTTP exception
-    if updated_faculty is None:
+    try:
+        return await update_faculty(
+            db = db,
+            institute_id = membership.institute_id,
+            emp_id = emp_id,
+            faculty_data = faculty,
+        )
+    except FacultyNotFoundError as error:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = "Faculty doesn't exists."
-        )
+            detail = str(error)
+        ) from error
+    except DuplicateFacultyError as error:
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail = str(error)
+        ) from error
+    except FacultyReferenceNotFoundError as error:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = str(error)
+        ) from error
 
-    # Setting the values into the new object
-    for key, value in faculty.model_dump(exclude_unset = True).items:
-        setattr(updated_faculty, key, value)
-
-    db.add(updated_faculty)
-    await db.commit()
-    await db.refresh(updated_faculty)
-
-    return updated_faculty
 
 # --------- DELETE A FACULTY ROUTE ---------
 @router.delete("/delete/{emp_id}", status_code = status.HTTP_204_NO_CONTENT)
 async def delete_faculty(
     emp_id: int,
-    access: Annotated[User, Depends(admin_access)],
+    membership: Annotated[Membership, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    # Check if faculty exists
-    faculty = await db.scalar(
-        select(Faculty).where(Faculty.emp_id == emp_id)
-    )
-
-    # If not, raise HTTP exception
-    if faculty is None:
+    try:
+        await delete_faculty_service(
+            db = db,
+            institute_id = membership.institute_id,
+            emp_id = emp_id,
+        )
+    except FacultyNotFoundError as error:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = "Faculty doesn't exists."
-        )
-
-    await db.delete(faculty)
-    await db.commit()
+            detail = str(error)
+        ) from error
 
