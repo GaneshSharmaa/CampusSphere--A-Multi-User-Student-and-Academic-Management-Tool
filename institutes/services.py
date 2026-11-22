@@ -2,6 +2,7 @@
 import secrets, string
 from typing import Annotated
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Importing the database model
@@ -9,6 +10,9 @@ from institutes.models import Institute
 
 # Importing the database dependencies
 from database.dependencies import get_db
+from institutes.exceptions import DuplicateInstituteError, InstituteNotFoundError
+from institutes.schemas import InstituteCreate
+
 
 # ------ FUNCTION FOR GENERATING UNIQUE CODES ------
 async def generate_code(
@@ -38,6 +42,7 @@ async def generate_code(
         if code_chk is None:
             return code
 
+
 # ------ FUNCTION FOR CHECKING IF THE INSTITUTE EXISTS ------
 async def chk_institute_exists(
     db: AsyncSession,
@@ -48,4 +53,45 @@ async def chk_institute_exists(
     )
 
     return institute_exists
+
+
+# ------ FUNCTION FOR CREATING A NEW INSTITUTE ------
+async def create_institute(
+    db: AsyncSession,
+    institute_data: InstituteCreate,
+) -> Institute:
+    existing_name = await db.scalar(
+        select(Institute.id).where(
+            Institute.institute_name == institute_data.institute_name
+        )
+    )
+    if existing_name is not None:
+        raise DuplicateInstituteError("Institute name already exists.")
+
+    while True:
+        code = await generate_code(db)
+        new_institute = Institute(
+            institute_code=code,
+            institute_name=institute_data.institute_name,
+        )
+        db.add(new_institute)
+
+        try:
+            await db.commit()
+        except IntegrityError:
+            await db.rollback()
+
+            existing_name = await db.scalar(
+                select(Institute.id).where(
+                    Institute.institute_name == institute_data.institute_name
+                )
+            )
+            if existing_name is not None:
+                raise DuplicateInstituteError("Institute name already exists.") from None
+
+            # A generated code collided. Retry with a different code.
+            continue
+
+        await db.refresh(new_institute)
+        return new_institute
 
