@@ -14,6 +14,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2scheme = OAuth2PasswordBearer(tokenUrl = "user/login")
 
+
 # Function to get current user using token
 async def get_current_user(
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -38,6 +39,31 @@ async def get_current_user(
         )
 
     return user
+
+
+# Creating a dependency for getting the membership of the user (using Headers)
+async def get_current_user_institute_membership(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    institute_id: Annotated[int, Header(alias = "X-Institute-ID")]
+) -> Membership:
+    membership = await db.scalar(
+        select(Membership)
+        .options(selectinload(Membership.role))
+        .where(
+            Membership.user_id == current_user.id,
+            Membership.institute_id == institute_id
+        )
+    )
+
+    if membership is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Not authorized."
+        )
+
+    return membership
+
 
 '''
 # Creating a dependency for getting the membership of the user (using JWT)
@@ -65,27 +91,4 @@ async def get_user_membership(
 
     return membership
 '''
-
-# Creating a dependency for getting the membership of the user (using Headers)
-async def get_current_user_institute_membership(
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)],
-    institute_id: Annotated[int, Header(alias = "X-Institute-ID")]
-) -> Membership:
-    membership = await db.scalar(
-        select(Membership)
-        .options(selectinload(Membership.role))
-        .where(
-            Membership.user_id == current_user.id,
-            Membership.institute_id == institute_id
-        )
-    )
-
-    if membership is None:
-        raise HTTPException(
-            status_code = status.HTTP_403_FORBIDDEN,
-            detail = "Not authorized."
-        )
-
-    return membership
 
